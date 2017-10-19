@@ -9,9 +9,9 @@ const state = {
     tabPostShow:true,
     needGuide:false,
     hasNewMessage:false,
-    homeNavShow:true
+    homeNavShow:true,
+    homeNavTransparent:true
 }
-
 const actions = {
 	setComConf({commit},settings){
 		commit(types.COM_CONF,settings)

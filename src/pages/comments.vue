@@ -8,8 +8,9 @@ pull-to-refresh
 id="comments"
 class="comments-page"
 @page:beforeanimation="reinitPage"
-@ptr:refresh="onRefresh">
-  <f7-navbar>
+@ptr:refresh="onRefresh"
+ref="commentPage">
+  <f7-navbar >
     <f7-nav-left>
       <f7-link icon-only back>
         <i class="iconfont icon-back">
@@ -22,73 +23,51 @@ class="comments-page"
     <f7-nav-right>
     </f7-nav-right>
   </f7-navbar>
-  <div v-if="!postComlist&&replyType=='post' || !evalComlist&&replyType=='eval'">
-      <div class="noComment">
-          <img src="../assets/images/noComment.png" alt="">
+  <div class="main-content">
+      <div v-if="!postComlist&&replyType=='post' || !evalComlist&&replyType=='eval'">
+          <div class="noComment">
+              <img src="../assets/images/noComment.png" alt="">
+          </div>
+          <p class="no-comment-title">沙发空缺~</p>
       </div>
-      <p class="no-comment-title">沙发空缺~</p>
+      <f7-list>
+        <f7-list-item v-for="(item, index) in commentList" :key="item.id">
+          <f7-link :href="'/otherInfo/'+ item.user_id">
+            <div class="left-block">
+                <div class="avatar">
+                  <img :src="item.avatar" alt="">
+                </div>
+            </div>
+          </f7-link>
+          <div class="right-block">
+            <div class="info">
+              <span>{{item.user_name}}</span>
+              <thumb :diggId="replyType=='eval'?item.pid:item.id" :type='replyType' :diggsNum='item.diggs' :isDigg='item.is_digg'></thumb>
+            </div>
+            <p class="date" v-if="item.dateline">
+              <timeago :since="item.dateline*1000" :max-time="86400" :format='tool.convertDate'></timeago>
+            </p>
+            <commentMore :list="item.comments" v-if="item.comments"></commentMore>
+            <p class="user-comment" @click.stop="replyFCom(item)">{{item.message}}</p>
+          </div>
+        </f7-list-item>
+      </f7-list>
   </div>
-  <f7-list>
-    <f7-list-item v-for="(item, index) in evalComlist" :key="item.id" v-if="replyType=='eval'">
-      <f7-link :href="'/otherInfo/'+ item.user_id">
-        <div class="left-block">
-            <div class="avatar">
-              <img :src="item.avatar" alt="">
-            </div>
-        </div>
-      </f7-link>
-      <div class="right-block">
-        <div class="info"><span>{{item.user_name}}</span>
-          <thumb :diggId='item.pid' :type='replyType' :diggsNum='item.diggs' :isDigg='item.is_digg'></thumb>
-        </div>
-        <p class="date" v-if="item.dateline">
-          <timeago :since="item.dateline*1000" :max-time="86400" :format='tool.convertDate'></timeago>
-        </p>
-        <commentMore :list="item.comments" v-if="item.comments"></commentMore>
-        <p class="user-comment" @click="replyFCom(item.pid,item.tfid,item.tid,item.user_name)">{{item.message}}</p>
-      </div>
-    </f7-list-item>
-    <f7-list-item v-for="(item, index) in postComlist" :key="item.id" v-if="replyType=='post'">
-      <f7-link :href="'/otherInfo/'+ item.user_id ">
-        <div class="left-block">
-            <div class="avatar">
-              <img :src="item.avatar" alt="">
-            </div>
-        </div>
-      </f7-link>
-      <div class="right-block">
-        <div class="info">
-          <span>{{item.user_name}}</span>
-          <thumb :diggId='item.pid' :type='replyType' :diggsNum='item.diggs' :isDigg='item.is_digg'></thumb>
-        </div>
-        <p class="date" v-if="item.dateline">
-          <timeago :since="item.dateline*1000" :max-time="86400" :format='tool.convertDate'></timeago>
-        </p>
-        <commentMore :list="item.comments" v-if="item.comments"></commentMore>
-        <p class="user-comment" @click="replyFCom(item.pid,item.tfid,item.tid,item.user_name)">{{item.message}}</p>
-      </div>
-    </f7-list-item>
-  </f7-list>
   <div slot="fixed" class="reply-box">
     <div class="reply-input">
-      <form @submit.prevent="submitComment">
-        <input id="replying"
-        @focus="replyCom"
-        @blur="focusOut"
-        @click="fixScroll"
-        v-model="commentContent"
-        type="text"
-        name="replying"
-        :placeholder="this.ReplyIds.name =='本帖' ? '回复作者:':'回复 '+this.ReplyIds.name
-	+'的评论:'">
-        <!-- <label for="replying" id="replyingLable"><img src="../assets/images/comment/draw.png" alt=""></label> -->
-      </form>
+        <form @submit.prevent="submitComment">
+          <input id="replying"
+          @focus="replyCom"
+          @blur="focusOut"
+          v-model="commentContent"
+          type="text"
+          name="replying"
+          :placeholder="this.ReplyIds.name =='本帖' ? '回复作者:':'回复 '+this.ReplyIds.name
+    +'的评论:'">
+        </form>
     </div>
-    <button class="btn-link reply-btn" :disabled="!validComment" :class="{'text-sub':validComment}" @click="submitComment">
-      发送
-    </button>
+    <button class="btn-link reply-btn" :disabled="!validComment" :class="{'text-sub':validComment}" @click.stop="submitComment">发送</button>
   </div>
-
 </f7-page>
 </template>
 
@@ -121,7 +100,7 @@ class="comments-page"
     .item-content {
         padding: 0;
         .item-inner {
-            padding: 0.54054rem 0;
+            padding: 0.54054rem 0 0.27027rem 0;
             -webkit-align-items:flex-start;
             align-items:flex-start;
             .left-block {
@@ -147,7 +126,7 @@ class="comments-page"
                     color: #999;
                     padding-left: 10px;
                 }
-                div {
+                .info {
                     width: 100%;
                     font-size: 0.37838rem;
                     text-align: left;
@@ -171,7 +150,7 @@ class="comments-page"
                     width: 7.83784rem;
                     font-size: 0.37838rem;
                     text-align: left;
-                    margin-top: 0.27027rem;
+                    margin : 0.27027rem 0;
                     color: #666;
                     padding-left: 10px;
                 }
@@ -179,37 +158,40 @@ class="comments-page"
         }
     }
     .reply-box {
-        position: fixed;
+        position: absolute;
         display: flex;
         justify-content: space-between;
         top: auto;
         bottom: 0;
         width: 100%;
-        height: 1.45946rem;
+        height: 50px;
         background-color: #fff;
-        border: solid 0.013514rem #ebebeb;
+        border: solid .5px #ebebeb;
         z-index: 100;
         .active-state {
             background: #e8e8e8;
         }
         .reply-input {
             flex: 1;
-            line-height: 1.45946rem;
+            line-height: 50px;
             padding-left: 15px;
         }
         .reply-btn {
             padding: 0 15px;
-            line-height: 1.45946rem;
+            line-height: 50px;
+            font-size: 14px;
+
         }
         input {
             width: 100%;
-            height: 0.89189rem;
-            border-radius: 4px;
+            height: 32px;
+            border-radius: 2px;
             background-color: #fbfbfb;
-            border: solid 0.01351rem #ebebeb;
-            padding-left:  0.48649rem;
+            border: solid .5px #ebebeb;
+            padding-left:  15px;
             text-align: left;
             box-sizing: border-box;
+            font-size: 14px;
         }
         input::placeholder {
             padding-left: 5px;
@@ -236,9 +218,14 @@ export default {
     thumb
   },
   mounted() {
-    console.log(this.replyType);
   },
   computed: {
+    replayContentId(){
+      return this.$route.params.commentid
+    },
+    commentList(){
+      return this.replyType=="eval"?this.evalComlist:this.postComlist
+    },
     evalComlist() {
       return this.$store.getters.evalCommentList;
     },
@@ -246,7 +233,7 @@ export default {
         return this.commentContent.length>2
     },
     user(){
-      return this.$store.getters.getUser
+      return this.$store.getters.getUserInfo
     },
     postComlist() {
       return this.$store.getters.postCommentList;
@@ -254,11 +241,8 @@ export default {
     ReplyIds() {
       return this.$store.getters.setReplyIds;
     },
-    user(){
-      return this.$store.getters.getUser;
-    },
     replyType() {
-      return this.$store.getters.replyType;
+      return this.$route.params.replyType;
     }
   },
   methods: {
@@ -266,13 +250,13 @@ export default {
       var self = this;
       if (this.replyType == 'eval') {
         this.$store.dispatch("getEvalCommentList", {
-          tid: self.$route.params.pid,
+          tid: self.replayContentId,
           limit: 100,
           page: 1
         }).then(function() {}, function(data) {})
       } else {
         this.$store.dispatch("getPostCommentList", {
-          id: self.$route.params.pid,
+          id: self.replayContentId,
           limit: 100,
           page: 1
         }).then(function() {}, function(data) {})
@@ -280,10 +264,28 @@ export default {
       self.$store.commit("setReplyIds", {
         pid: 0,
         tfid: 0,
-        tid: self.$route.params.pid,
+        tid: self.replayContentId,
         name: '本帖'
-      });
+      })
+      self.$$(self.$refs.commentPage.$el).on("click",()=>{
+          self.$store.commit("setReplyIds", {
+            pid: 0,
+            tfid: 0,
+            tid: self.replayContentId,
+            name: '本帖'
+          });
+      })
     },
+    // reSetReplyIds(){
+    //     var self = this;
+    //     console.log(222);
+    //     self.$store.commit("setReplyIds", {
+    //       pid: 0,
+    //       tfid: 0,
+    //       tid: self.replayContentId,
+    //       name: '本帖'
+    //     });
+    // },
     initPage() {
       plus.navigator.setStatusBarStyle('dark');
     },
@@ -294,43 +296,32 @@ export default {
       this.timer = setInterval(function() {
           document.body.scrollTop = document.body.scrollHeight;
       }, 300)
-    //   console.log(this.ReplyIds);
     },
     focusOut() {
       var self = this;
-    //   this.$store.commit("setReplyIds", {
-    //     pid: 0,
-    //     tfid: 0,
-    //     tid: self.$route.params.pid,
-    //     name: '本帖'
-    //   });
       clearTimeout(self.timer)
     },
     showmore() {
       this.showCom = !this.showCom;
     },
-    replyFCom(pid, tfid, tid, name) {
-      if(name == this.user.username){
+    replyFCom(item) {
+      if(item.user_id == this.user.id){
           this.$toast.center("不能回复自己的评论");
           return false;
       }
       document.getElementById('replying').focus();
       this.$store.commit("setReplyIds", {
-        pid: pid,
-        tfid: tfid,
-        tid: tid,
-        name: name
+        pid: item.pid,
+        tfid: item.tfid,
+        tid: item.tid,
+        name: item.user_name
       });
-      console.log(this.ReplyIds);
-    },
-    fixScroll(){
-        //document.body.scrollTop = document.body.scrollHeight-30;
     },
     onRefresh() {
       var self = this;
       if (this.replyType == 'eval') {
         self.$store.dispatch("getEvalCommentList", {
-          tid: self.$route.params.pid,
+          tid: self.replayContentId,
           limit: 100,
           page: 1
         }).then(function() {
@@ -338,7 +329,7 @@ export default {
         }, function(data) {})
       } else {
         self.$store.dispatch("getPostCommentList", {
-          id: self.$route.params.pid,
+          id: self.replayContentId,
           limit: 100,
           page: 1
         }).then(function() {
@@ -348,8 +339,7 @@ export default {
     },
     submitComment() {
         var self = this;
-        console.log(this.user);
-        if(!this.user.hasLogin){
+        if(!this.$store.getters.userHasLogin){
           this.$store.commit("COM_CONF",{
             isLoginScreenShow:true
           })
@@ -372,13 +362,13 @@ export default {
               self.$toast.center("回复成功")
               self.commentContent = '';
               self.$store.commit("setReplyIds", {
-                pid: 0,
-                tfid: 0,
-                tid: self.$route.params.pid,
-                name: '本帖'
+                  pid: 0,
+                  tfid: 0,
+                  tid: self.replayContentId,
+                  name: '本帖'
               });
               self.$store.dispatch("getPostCommentList",{
-                id: self.$route.params.pid,
+                id: self.replayContentId,
                 limit: 100,
                 page: 1
               })
@@ -387,7 +377,7 @@ export default {
             this.$store.dispatch("replyPostComments",{
                 cmt_id: 0,
                 tcmt_id: 0,
-                feed_id: self.$route.params.pid,
+                feed_id: self.replayContentId,
                 message: this.commentContent
             }).then(function(data) {
               self.$toast.center("回复成功")
@@ -395,11 +385,11 @@ export default {
               self.$store.commit("setReplyIds", {
                 pid: 0,
                 tfid: 0,
-                tid: self.$route.params.pid,
+                tid: self.replayContentId,
                 name: '本帖'
               });
               self.$store.dispatch("getPostCommentList", {
-                id: self.$route.params.pid,
+                id: self.replayContentId,
                 limit: 100,
                 page: 1
               })
@@ -418,11 +408,11 @@ export default {
               self.$store.commit("setReplyIds", {
                 pid: 0,
                 tfid: 0,
-                tid: self.$route.params.pid,
+                tid: self.replayContentId,
                 name: '本帖'
               })
               self.$store.dispatch("getEvalCommentList", {
-                tid: self.$route.params.pid,
+                tid: self.replayContentId,
                 limit: 100,
                 page: 1
               })
@@ -431,7 +421,7 @@ export default {
             this.$store.dispatch("replyComments",{
                 fid: 0,
                 tfid: 0,
-                tid: self.$route.params.pid,
+                tid: self.replayContentId,
                 message: this.commentContent
             }).then(function(data) {
               self.$toast.center("回复成功")
@@ -439,11 +429,11 @@ export default {
               self.$store.commit("setReplyIds", {
                 pid: 0,
                 tfid: 0,
-                tid: self.$route.params.pid,
+                tid: self.replayContentId,
                 name: '本帖'
               })
               self.$store.dispatch("getEvalCommentList", {
-                tid: self.$route.params.pid,
+                tid: self.replayContentId,
                 limit: 100,
                 page: 1
               })

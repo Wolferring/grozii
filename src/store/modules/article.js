@@ -182,9 +182,9 @@ const mutations = {
         state.articleDetail.diggs--
     },
     clearAllDetailCache(state){
-        state.articleDetail = {}
+        // state.articleDetail = {}
         state.articleDetailList = {}
-        state.feedDetail = {}
+        // state.feedDetail = {}
         state.feedDetailList = {}
     }
 }

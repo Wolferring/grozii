@@ -1,8 +1,8 @@
 <template>
-    <f7-login-screen 
-    @loginscreen:open="loginOpen" 
-    @loginscreen:close="loginClose" 
-    v-if="!userLogin" 
+    <f7-login-screen
+    @loginscreen:open="loginOpen"
+    @loginscreen:close="loginClose"
+    v-if="!userLogin"
     id="login-screen"
 
     :opened="comConf.isLoginScreenShow">
@@ -10,7 +10,7 @@
             <f7-pages>
                 <f7-page login-screen overflowbar-hidden >
                     <div @touchmove.stop.prevent>
-                        
+
                     <div class="login-screen-back" >
                         <img src="../assets/images/loginscreen.png" alt="">
                     </div>
@@ -27,7 +27,7 @@
                             <f7-list-item>
                                 <span><i class="iconfont icon-key"></i></span>
                                 <f7-input id='pwdinput' name="password" :type="pwdtype" v-model.trim="password"  @keyup="changepwd($event)"placeholder="请输入密码" ></f7-input>
-                                <span><i class="iconfont icon-eye icon-only" @click="showPwd"  :class="{'':hidePwd , 'icon-eye-show':!hidePwd}"></i></span>
+                                <f7-link icon-only><i class="iconfont icon-eye " @click="showPwd"  :class="{'':hidePwd , 'icon-eye-show':!hidePwd}"></i></f7-link>
                             </f7-list-item>
                             <f7-list-item class="register-item">
                                 <f7-link open-popup="#register-popup">立即注册</f7-link>
@@ -51,12 +51,12 @@
                             <div class="third-login login-weibo">
                                 <i class="iconfont icon-weibo"></i>
                             </div>
-                        </f7-link>  
+                        </f7-link>
                         <f7-link v-if="qq" @click="thirdLogin('qq')">
                             <div class="third-login login-qq">
                                 <i class="iconfont icon-anonymous-iconfont"></i>
                             </div>
-                        </f7-link>                                                
+                        </f7-link>
                     </f7-grid>
                     <p class="bottom-title">注册即代表你同意<f7-link href="/userAgreement/">《格物志用户协议》</f7-link></p>
                     </div>
@@ -160,22 +160,17 @@
                     .login-title{
                         display: inline-block;
                         margin:0;
-                        font-size: 0.75676rem;
+                        font-size: 23px;
                         color: #000;
+                        i{
+                            margin-left: 1.62162rem;
+                            vertical-align: middle;
+                        }
                     }
                     a{
                         float: right;
                         vertical-align: middle;
                         color:#6d6d72;
-                    }
-                }
-                .login-title{
-                    font: 0.75676rem;
-                    color: #000;
-                    margin:0;
-                    i{
-                        margin-left: 1.62162rem;
-                        vertical-align: middle;
                     }
                 }
                 .login-box{
@@ -190,7 +185,7 @@
                         padding:0;
                         line-height:1.32432rem!important;
                         border-radius:1.32432rem;
-                        font-size: 0.48649rem;
+                        font-size: 18px;
                         color: #fff;
                     }
                 }
@@ -217,7 +212,7 @@
                     top: -0.24324rem;
                     left: 50%;
                     padding:0 0.54054rem;
-                    font-size: 0.37838rem;
+                    font-size: 14px;
                     color:#dfdfdf;
                     -webkit-transform: translateX(-50%);
                     -moz-transform: translateX(-50%);
@@ -266,8 +261,12 @@
                     span:last-child{
                         padding-right: 0;
                     }
-                    i{
+                    .iconfont{
                         color:#6d6d72;
+                        font-size: 16px;
+                    }
+                    .icon-eye{
+                        font-size: 14px;
                     }
                     .icon-eye-show{
                         color:@sub-color;
@@ -292,6 +291,7 @@
         hidePwd:true,
         authService:"",
         statusStyle:"",
+        loginRetryTime:0,
         weixin:false,
         sinaweibo:false,
         qq:false
@@ -324,7 +324,7 @@
                 }
             }, function(e) {
                 return null;
-            });        
+            });
         },
         closeLoginPop(){
             this.username = '';
@@ -348,19 +348,24 @@
             }
             this.$store.dispatch("getLogin",user).then(function(data){
                 self.$toast.center("登录成功")
-                plus.nativeUI.closeWaiting()    
+                plus.nativeUI.closeWaiting()
                 //window.location.reload();
             },function(data){
-                self.$toast.center(data.msg||"登录失败,请重试")
+                if(!data.msg&&self.loginRetryTime<3){
+                    self.login()
+                    self.loginRetryTime++
+                    return false
+                }
+                self.$toast.center(data.msg||"登录失败，请重试")
                 try{
                     plus.nativeUI.closeWaiting()
                 }
                 catch(e){
 
                 }
-                    
+
             })
-                
+
         },
         thirdLogin(type){
             var service,
@@ -375,7 +380,7 @@
                 service.login(function(e) {
                     self.thirdUserInfo(type);
                 }, function(e) {
-                    console.log("登录认证失败！");
+                    self.$toast.center("获取认证失败")
                 });
             }
         },
@@ -398,9 +403,9 @@
                         self.thirdLogout();
                     },100)
                 }, function(e) {
-                    console.log("获取用户信息失败：" + e.message + " - " + e.code);
+                    self.$toast.center("获取用户信息失败,请重试");
                 });
-            }          
+            }
         },
         thirdDoLogin(user,type){
             var self = this;
@@ -424,7 +429,7 @@
                     service.logout();
                 }
             }
-        },    
+        },
         change(e){
             this.username = e.target.value.slice(0,11);
         },
@@ -441,7 +446,7 @@
                 return true;
             }
             return false;
-        },        
+        },
         userLogin(){
             return this.$store.getters.userHasLogin
         },
@@ -450,7 +455,7 @@
                 return false;
             }
             return true
-        },        
+        },
         loginFormValid(){
             return this.passwordValid&&this.phoneValid
         }

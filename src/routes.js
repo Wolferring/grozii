@@ -32,19 +32,23 @@ export default [
 		component:require('./pages/userAdvice.vue')
 	},
 	{
-		path:"/evalDetail/:pid",
+		path:"/userReport/",
+		component:require('./pages/userReport.vue')
+	},
+	{
+		path:"/evalDetail/:eid",
 		component:require('./pages/evalDetail.vue')
 	},
 	{
 		path:"/evalGoods/",
 		component:require('./pages/evalGoods.vue')
-	},	
+	},
 	{
 		path:"/postDetail/:pid",
 		component:require('./pages/postDetails.vue')
 	},
 	{
-		path:"/comments/:pid",
+		path:"/comments/:replyType/:commentid",
 		component:require('./pages/comments.vue')
 	},
 	{
@@ -56,7 +60,7 @@ export default [
 		component:require('./pages/news.vue')
 	},
 	{
-		path:"/chat/:pid",
+		path:"/chat/:chatid",
 		component:require('./pages/chat.vue')
 	},
 	{
@@ -72,7 +76,7 @@ export default [
 		component:require('./pages/personSetting.vue')
 	},
 	{
-		path:"/otherInfo/:pid",
+		path:"/otherInfo/:ouid",
 		component:require('./pages/otherInfo.vue')
 	},
 	{
@@ -92,11 +96,11 @@ export default [
 		component:require('./pages/my/changeAvatar.vue')
 	},
 	{
-		path:"/userFans/:pid",
+		path:"/userFans/:user_id",
 		component:require('./pages/my/userFans.vue')
 	},
 	{
-		path:"/userFollows/:pid",
+		path:"/userFollows/:user_id",
 		component:require('./pages/my/userFollows.vue')
 	},
 	{
@@ -106,5 +110,9 @@ export default [
 	{
 		path:"/personalBind/",
 		component:require('./pages/personalBind.vue')
+	},
+	{
+		path:"/topic/:topicId",
+		component:require('./pages/topic.vue')
 	}
 ]

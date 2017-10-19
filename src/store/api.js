@@ -44,8 +44,7 @@ document.addEventListener("netchange",function(){
     }
 }, false );
 
-var url = process.env.NODE_ENV != 'production' ? config.host.dev : config.host.prod;
-
+var url = process.env.NODE_ENV != 'production' ? config.host.prod : config.host.prod;
 
 var asyncGet = (options,cb) => {
     //判断是否离线
@@ -64,7 +63,7 @@ var asyncGet = (options,cb) => {
     axios(options)
     .then((res) => {
         // 数据回来以后判断请求状态
-        if(res.status >= 200 && res.status <305){
+        if(res.status == 200){
             //判断请求是否需要缓存
             if(options.cache&&res.data&&res.data.code==2000){
                 if(res.data.data instanceof Array){
@@ -287,7 +286,7 @@ export default {
     //删除文章
     getArticleDelete:(data,cb)=>{
         asyncGet({
-            url:url+"/v1/post",
+            url:url+"/v1/post/"+data.id,
             method:"DELETE",
             data:data,
             cache:false
@@ -295,7 +294,7 @@ export default {
     },
     getFeedDelete:(data,cb)=>{
         asyncGet({
-            url:url+"/v1/feed",
+            url:url+"/v1/feed/"+data.id,
             method:"DELETE",
             data:data,
             cache:false
@@ -330,6 +329,15 @@ export default {
     postUserAdvice:(payload,cb)=>{
         asyncGet({
             url:url+"/v1/site/suggest",
+            method:"POST",
+            data:payload,
+            cache:false
+        },cb)
+    },
+    //举报
+    postUserReport:(payload,cb)=>{
+        asyncGet({
+            url:url+"/v1/site/report",
             method:"POST",
             data:payload,
             cache:false
@@ -564,6 +572,22 @@ export default {
             url:url+"/v1/account/user-follows",
             method:'GET',
             params:data,
+            cache:false
+        },cb)
+    },
+    //获取所有专题
+    getAllTopic:(cb)=>{
+        asyncGet({
+            url:url+"/v1/topic/all",
+            method:"GET",
+            cache:true
+        },cb)
+    },
+    //专题页内容
+    getTopicContent:(id,cb)=>{
+        asyncGet({
+            url:url+"/v1/topic/"+id,
+            method:'Get',
             cache:false
         },cb)
     },

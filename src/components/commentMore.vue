@@ -2,12 +2,12 @@
 
     <div class="comment-content">
         <ul>
-            <li class="border-bottom" v-for="(innerItem,index) in list" v-if="index<3 || showCom" @click="replyInnerCom(innerItem.pid,innerItem.tfid,innerItem.tid,innerItem.user_name)">
+            <li class="border-bottom" v-for="(innerItem,index) in list" v-if="index<3 || showCom" @click.stop="replyInnerCom(innerItem)">
                 <!-- {{innerItem}} -->
                 <span class="reply-user">{{innerItem.user_name}}:</span><span class="reply-text">{{innerItem.message}}</span>
             </li>
             <li class="show-more" @click="showmore" v-if="list.length > 3">
-                <span><img src="../assets/images/comment/more.png" alt="" :class="showCom? '':'upsideImg' ">{{showCom?"折叠":"展开更多评论"}}</span>
+                <span><img src="../assets/images/comment/more.png" alt="" :class="showCom? '':'upsideImg' ">{{showCom?"收起评论":"展开更多评论"}}</span>
             </li>
         </ul>
     </div>
@@ -17,9 +17,6 @@
 .comment-content{
     width: 7.83784rem;
     margin-top: 0.37838rem;
-    // border-radius: 2px;
-    // border: solid .5px #f3f3f3;
-    font-weight: 500;
     text-align: left;
     ul{
         padding-left:0;
@@ -40,22 +37,20 @@
         .show-more{
             text-align: center;
             color:#3f8cea;
-            i{
+            font-size: 12px;
+            .iconfont{
                 display: inline-block;
+                font-size: 14px;
             }
             .upsideImg{
                 transform:rotate(180deg);
             }
             img{
-                width: 0.32432rem;
-                margin-right: 0.08108rem;
-                vertical-align: middle;
+                width: .32rem;
+                margin-right: .13333333rem;
+                vertical-align: initial;
             }
         }
-    }
-    p{
-        color:#666;
-        font-size:0.37838rem;
     }
 }
 </style>
@@ -70,21 +65,28 @@
         computed:{
             setReplyIds(){
               return this.$store.getters.setReplyIds
-            }
+          },
+          user(){
+            return this.$store.getters.getUserInfo
+          },
         },
         methods:{
             showmore(){
               this.showCom = !this.showCom;
             },
-            replyInnerCom(pid,tfid,tid,name){
+            replyInnerCom(innerItem){
+                console.log(innerItem);
+                if(innerItem.user_id == this.user.id){
+                    this.$toast.center("不能回复自己的评论");
+                    return false;
+                }
                 document.getElementById('replying').focus();
                 this.$store.commit("setReplyIds", {
-                    pid:pid,
-                    tfid:tfid,
-                    tid:tid,
-                    name:name
+                    pid:innerItem.pid,
+                    tfid:innerItem.tfid,
+                    tid:innerItem.tid,
+                    name:innerItem.name
                 });
-                console.log(this.setReplyIds);
             }
         }
 	}

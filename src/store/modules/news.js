@@ -8,7 +8,8 @@ const state = {
         3:[],
         4:[]
     },
-    newsMessage:[]
+    newsMessage:[],
+    newMessageSet:Object
 }
 
 const actions = {
@@ -20,6 +21,7 @@ const actions = {
                     return false;
                 }
                 commit("setNewsList",{data:data.data.list,id:id})
+                commit("newMessageSet",data.data.unread)
                 resolve(data)
             })
         })
@@ -52,6 +54,7 @@ const actions = {
 
 const getters = {
     getMessageList:state=>state.newsList,
+    getNewMessageSet:state=>state.newMessageSet,
     newsMessage:state=>state.newsMessage
 }
 
@@ -64,7 +67,10 @@ const mutations = {
     },
     replyNewMessage(state,replyInfo){
         state.replyInfo = replyInfo;
-    }
+    },
+    newMessageSet(state,set){
+        state.newMessageSet = set;
+    },
 }
 
 export default {

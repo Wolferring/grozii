@@ -7,13 +7,14 @@
 	    :key="item.id"
 	  >
 	  	<img :src="item.cover" slot="media" alt="">
+	  	<span class="label label-digest" slot="media-start" v-if="item.is_digest">精华</span>
 	  	<div class="content">{{item.title}}</div>
 		<div class="auth">
 			<div class="author">
 				<span class="avatar">
 					<img :src="item.author.avatar" alt="">
 				</span>
-				<span class="name">{{item.author.username}}</span>						
+				<span class="name">{{item.author.username}}</span>
 			</div>
 			<div class="likes">
 				<span>
@@ -27,6 +28,7 @@
 			</div>
 		</div>
 	</f7-list-item>
+
 </f7-list>
 </template>
 <style lang="less">
@@ -39,13 +41,27 @@
 .pixel-ratio-3{
 	.article-list-comp .item-content:after{
 	    transform: scaleY(.33);
-	}	
-}	
+	}
+}
 .article-list-comp{
 	margin: 0;
 	padding: 0 .26666667rem;
 	ul:after{
 		background-color: #e2dede;
+	}
+	.label.label-digest{
+		position: absolute;
+		left: 0;
+		z-index: 2;
+		top: 4px;
+		font-size: 10px;
+		color: #fff;
+		padding: 0 4px;
+	    margin-right: 5px;
+	    height: 16px;
+	    line-height: 16px;
+	    vertical-align: text-bottom;
+	    background-image: linear-gradient(338deg, #f8ad36, #ff6464);
 	}
 	.item-content{
 		padding-left: 0;
@@ -132,8 +148,8 @@
 					margin-right: .26666667rem;
 				}
 			}
-		}					
-	}	
+		}
+	}
 }
 </style>
 <script>

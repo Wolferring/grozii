@@ -16,7 +16,7 @@ import Framework7ThemeColors from 'framework7/dist/css/framework7.material.color
 
 // Import Routes
 import Routes from "./routes.js";
-
+  
 // Import App Component
 import App from "./app.vue";
 
@@ -32,10 +32,14 @@ import store from "./store/";
 
 //自定义工具方法
 import tool from  './assets/js/tool.js'
+
+
 Vue.prototype.tool = tool.tool
 import "vue2-toast/lib/toast.css";
 import Toast from "vue2-toast";
 import VueTimeago from 'vue-timeago';
+import cropper from 'vue-croppa/dist/vue-croppa.min.js';
+Vue.use(cropper)
 // Init F7 Vue Plugin
 Vue.use(Framework7Vue);
 Vue.use(Toast);
@@ -64,6 +68,7 @@ var root = new Vue({
     showBarsOnPageScrollEnd: false,
     swipeBackPageActiveArea:100,
     scrollTopOnStatusbarClick:true,
+    tapHold:true,
     routes: Routes
   },
   // Register App Component
@@ -94,6 +99,13 @@ if (conf.env.browser) {
     }else{
         plus.navigator.closeSplashscreen()
     }
+    let currentWebview = plus.webview.currentWebview()
+    let webViewIns = currentWebview.nativeInstanceObject();
+    webViewIns.plusCallMethod({"setKeyboardDisplayRequiresUserAction":false});    
+    currentWebview.setStyle({
+        softinputMode: "adjustResize"  // 弹出软键盘时自动改变webview的高度
+    }); 
+     
     plus.navigator.setStatusBarStyle('light');
     plus.nativeUI.closeWaiting()
   });

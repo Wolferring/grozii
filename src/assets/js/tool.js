@@ -1,24 +1,24 @@
 import Vue from "vue";
-Date.prototype.format = function(fmt) { 
-     var o = { 
-        "M+" : this.getMonth()+1,                 //月份 
-        "d+" : this.getDate(),                    //日 
-        "h+" : this.getHours(),                   //小时 
-        "m+" : this.getMinutes(),                 //分 
-        "s+" : this.getSeconds(),                 //秒 
-        "q+" : Math.floor((this.getMonth()+3)/3), //季度 
-        "S"  : this.getMilliseconds()             //毫秒 
-    }; 
+Date.prototype.format = function(fmt) {
+     var o = {
+        "M+" : this.getMonth()+1,                 //月份
+        "d+" : this.getDate(),                    //日
+        "h+" : this.getHours(),                   //小时
+        "m+" : this.getMinutes(),                 //分
+        "s+" : this.getSeconds(),                 //秒
+        "q+" : Math.floor((this.getMonth()+3)/3), //季度
+        "S"  : this.getMilliseconds()             //毫秒
+    };
     if(/(y+)/.test(fmt)) {
-            fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length)); 
+            fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
     }
     for(var k in o) {
        if(new RegExp("("+ k +")").test(fmt)){
             fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
         }
     }
-    return fmt; 
-}        
+    return fmt;
+}
 var tool = {
 	convertDate(time){
 		const d = new Date(time)
@@ -59,7 +59,7 @@ var tool = {
                 }]
             }
         });
-        webview.show("slide-in-right")        
+        webview.show("slide-in-right")
     },
     throttle(func, wait) {
         var context, args, timeout, result;
@@ -84,7 +84,7 @@ var tool = {
           }
           return result;
         };
-    }
+    },
 }
 Vue.filter('convertNumber', function (value) {
 	const digg = String(value);
@@ -94,9 +94,9 @@ Vue.filter('convertNumber', function (value) {
 			break;
 		case 5:
 			return digg.slice(0,2)+"."+digg.slice(2,3)+"k"
-			break;			
+			break;
 		default:
 			return digg
-	}	
+	}
 })
 export default {tool}

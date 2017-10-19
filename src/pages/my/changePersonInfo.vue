@@ -200,7 +200,7 @@ export default {
 							this.$router.back();
 						})
 						.catch(e=>{
-							self.$toast.center(e.msg||"修改失败");
+							self.$toast.center(e.msg||"修改失败，请重试");
 						})
 					}
 					break;
@@ -211,7 +211,7 @@ export default {
 						this.$router.back();
 					})
 					.catch(e=>{
-						self.$toast.center(e.msg||"修改失败");
+						self.$toast.center(e.msg||"修改失败，请重试");
 					})
 					break;
 				case "3":
@@ -221,7 +221,7 @@ export default {
 						this.$router.back();
 					})
 					.catch(e=>{
-						self.$toast.center(e.msg||"修改失败");
+						self.$toast.center(e.msg||"修改失败，请重试");
 					})
 					break;
 				case "4":
@@ -235,7 +235,7 @@ export default {
 							this.$router.back();
 						})
 						.catch(e=>{
-							self.$toast.center(e.msg||"修改失败");
+							self.$toast.center(e.msg||"修改失败，请重试");
 						})
 					}	
 					break;			

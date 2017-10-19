@@ -77,7 +77,7 @@ const actions = {
                     reject(data)
                     return false;
                 }
-                resolve(data.data)                
+                resolve(data)                
             })
         })
     }    

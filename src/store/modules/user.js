@@ -67,21 +67,21 @@ const actions = {
                     clientid:plus.push.getClientInfo()['clientid']
                 })
             }
-            api.userLogin(data,function(data){
-                if(data.code!=2000){
-                    reject(data)
+            api.userLogin(data,function(result){
+                if(result.code!=2000){
+                    reject(result)
                     return false;
                 }
                 window.localStorage.clear()
                 commit(types.COM_CONF,{
                     isLoginScreenShow:false
                 })
-                commit(types.USER,data.data)
+                commit(types.USER,result.data)
                 commit("clearAllDetailCache")
                 commit("hasLogin",true)
-                storage.set("auth_token",data.data.accessToken)
+                storage.set("auth_token",result.data.accessToken)
                 dispatch("refreshRecommend")
-                resolve(data)
+                resolve(result)
             })
         })
     },

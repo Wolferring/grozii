@@ -31,6 +31,9 @@ navbar-fixed
 .goods{
   padding: .4rem 0;
   color: #333;
+  .page-content{
+    padding-top: 64px!important;
+  }
   .list-block{
     margin: 0;
     .item-inner{

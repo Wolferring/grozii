@@ -14,7 +14,6 @@
 	          	<form action="" @submit.prevent.stop="doSearch">
 	          		<input type="search"
 	          			@focus="showSearchTool"
-	          			autofocus
 	          			v-model="searchInput"
 	          			id="searchInput"
 	          			:placeholder="searchPlaceholder" />
@@ -43,7 +42,7 @@
 				<span>综合</span>
 			</f7-link>
 			<f7-link tab-link="#tab-search-evaluating">
-				<span>好文</span>
+				<span>原创</span>
 			</f7-link>
 			<f7-link tab-link="#tab-search-share">
 				<span>晒物</span>
@@ -90,7 +89,7 @@
 		    </transition>
 
 		    <f7-tabs class="search-result" v-show="!searchToolShow">
-				<f7-tab id="tab-search-all" class="infinite-scroll" @tab:show="tabShow('all')" active>
+				<f7-tab id="tab-search-all" class="infinite-scroll" @tab:show.prevent.stop="tabShow('all')" active>
 					<template v-for="item in searchResult['all']">
 						<article-list :list="item.evaluating"></article-list>
 						<feed-row :list="item.share"></feed-row>
@@ -100,18 +99,18 @@
 					    <p class="infinite-tip" v-if="!query.all.more">没有更多了</p>
 				    </div>
 			    </f7-tab>
-			    <f7-tab id="tab-search-evaluating" class="infinite-scroll" @tab:show="tabShow('evaluating')">
+			    <f7-tab id="tab-search-evaluating" class="infinite-scroll" @tab:show.prevent.stop="tabShow('evaluating')">
 					<article-list :list="searchResult['evaluating']"></article-list>
 					<div class="infinite-scroll-preloader" >
 			            <f7-preloader v-if="query.evaluating.more&&query.evaluating.loading"></f7-preloader>
 					    <p class="infinite-tip" v-if="!query.evaluating.more">没有更多了</p>
 				    </div>
-				    <div class="text-center no-result-tip" v-if="!searchResult['evaluating'].length">
-		  	            <img src="../assets/images/noPost.png" alt="">
-		  	            <p>没有搜索到内容</p>
-				    </div>
+				    <div class="no-message-container" v-if="!searchResult['evaluating'].length">
+				      <img src="../assets/images/no-post.png" alt="">
+				      <p class="no-any-message">没有搜索到原创</p>
+				    </div>	
 			    </f7-tab>
-   			    <f7-tab id="tab-search-share" class="infinite-scroll with-back" @tab:show="tabShow('share')">
+   			    <f7-tab id="tab-search-share" class="infinite-scroll with-back" @tab:show.prevent.stop="tabShow('share')">
 	   			    <div class="post-water" v-if="searchResult['share'].length">
 	   			    	<div class="post-row">
 			                <div class="post-item" v-for="(item,key) in searchResult['share']" v-if="key%2==0" :key="item.id">
@@ -174,12 +173,12 @@
 			            <f7-preloader v-if="query.share.more&&query.share.loading"></f7-preloader>
 					    <p class="infinite-tip" v-if="!query.share.more">没有更多了</p>
 				    </div>
-				    <div class="text-center no-result-tip" v-if="!searchResult['share'].length">
-		  	            <img src="../assets/images/noPost.png" alt="">
-		  	            <p>没有搜索到内容</p>
+				    <div class="no-message-container" v-if="!searchResult['share'].length">
+				      <img src="../assets/images/no-feed.png" alt="">
+				      <p class="no-any-message">没有搜索到晒物</p>
 				    </div>				    
 			    </f7-tab>
-   			    <f7-tab id="tab-search-user" class="infinite-scroll" @tab:show="tabShow('user')">
+   			    <f7-tab id="tab-search-user" class="infinite-scroll" @tab:show.prevent.stop="tabShow('user')">
 					<ul class="search-user" v-if="searchResult['user'].length">
 					  <li
 						v-for="user in searchResult['user']"
@@ -203,11 +202,11 @@
 	   			    <div class="infinite-scroll-preloader" >
 			            <f7-preloader v-if="query.user.more&&query.user.loading"></f7-preloader>
 					    <p class="infinite-tip" v-if="!query.user.more">没有更多了</p>
-				    </div>
-				    <div class="text-center no-result-tip" v-if="!searchResult['user'].length">
-		  	            <img src="../assets/images/noPost.png" alt="">
-		  	            <p>没有搜索到用户</p>
-				    </div>				    
+				    </div>	
+				    <div class="no-message-container" v-if="!searchResult['user'].length">
+				      <img src="../assets/images/no-user.png" alt="">
+				      <p class="no-any-message">没有搜索到用户</p>
+				    </div>				    			    
 			    </f7-tab>			    
 		    </f7-tabs>
 	    </div>
@@ -302,7 +301,7 @@
 		}
 	}
 	.search-tool{
-		min-height: 101%;
+		min-height:100%;
 		width: 100%;
 		overflow-y: scroll;
 		position: absolute;
@@ -311,7 +310,7 @@
 		background: #fff;
 	}
 	.search-result{
-		height: 100%;
+		height: calc(~"100% - 30px");
 		padding-top: 30px;
 		.tab{
 			box-sizing: border-box;

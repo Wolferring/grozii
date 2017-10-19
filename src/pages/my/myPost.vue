@@ -5,7 +5,6 @@
           <f7-nav-left>
 			<f7-link icon-only back>
 				<i class="iconfont icon-back">
-
 				</i>
 			</f7-link>
           </f7-nav-left>
@@ -33,8 +32,10 @@
 			  </div>
 	  	        <f7-list media-list class="no-top-border article-list-comp" v-if="myPostOri" no-border>
 				  <a :href="'/evalDetail/'+ item.id" v-for="item in myPostOri">
-	  	          <f7-list-item   class="article-item-comp list-no-type">
+	  	          <f7-list-item  class="article-item-comp list-no-type">
 						<img :src="item.cover" slot="media" alt="">
+			            <span class="label label-digest" slot="media-start" v-if="item.is_digest">精华</span>
+
 		  	            <div class="content" slot="inner-start">{{item.content}}</div>
 		  	            <div class="auth" slot="inner">
 		  	              <div class="author">
@@ -59,17 +60,15 @@
 	  	          </f7-list-item>
 				  </a>
 	  	        </f7-list>
-	  	        <div v-if="!myPostOri">
-	  	          <div class="noMessage">
-	  	            <img src="../../assets/images/noPost.png" alt="">
-	  	          </div>
-	  	          <p class="no-any-message">还没有发布过原创</p>
-	  	        </div>
+				<div class="no-message-container" v-if="!myPostOri">
+					<img src="../../assets/images/no-post.png" alt="">
+					<p class="no-any-message">还没有发布过原创</p>
+				</div>	  	        
 	  	      </f7-tab>
 	  	      <f7-tab class="with-back" id="objPost" @tab:show.prevent.stop="tabShow('objPost')">
 			  <div class="loader text-center" v-if="shareLoading">
 				  <f7-preloader></f7-preloader>
-			  </div>		  	      
+			  </div>
 	  	        <div class="post-water" v-if="myPostRev">
 	  	          <div class="post-row">
 	  	            <!-- <transition-group name="fade"> -->
@@ -116,12 +115,10 @@
 	  	            </div>
 	  	          </div>
 	  	        </div>
-	  	        <div v-if="!myPostRev">
-	  	          <div class="noMessage">
-	  	            <img src="../../assets/images/noPost.png" alt="">
-	  	          </div>
-	  	          <p class="no-any-message">还没有发布过晒物</p>
-	  	        </div>
+				<div class="no-message-container" v-if="!myPostRev">
+					<img src="../../assets/images/no-feed.png" alt="">
+					<p class="no-any-message">还没有发布过晒物</p>
+				</div>
 	  	      </f7-tab>
 		    </f7-tabs>
 	    </div>
@@ -129,14 +126,15 @@
 			<div class="preloader" v-if="guessLoading"></div>
 			<p v-if="!guessMore" class="infinite-tip">没有更多了</p>
 		</div> -->
+
 	</f7-page>
 </template>
-<style lang="less" scoped>
+<style lang="less">
 	@import url('../../assets/less/var.less');
-
-	.page-meesage{
-	}
 	.myPost{
+		.page-content{
+			background-color: #f5f5f5!important;
+		}
 		.post-item{
 			image{
 				width: 100%;
@@ -162,6 +160,17 @@
 		.swipeout-delete-item{
 			background-color: red;
 		}
+		.article-item-comp{
+			background-color: #fff;
+			padding: 0 .26666667rem;
+
+		}
+		.article-list-comp{
+			padding: 0;
+			margin-top: .4rem;
+		}
+
+
 		.user-post-container{
 	        #original,#objPost{
 				.swiper-slide-active{
@@ -218,18 +227,25 @@ export default {
 	 }
   },
   mounted() {
-	var self =this;
-	this.$store.dispatch("myPostOriginal", {
-	  page: 1,
-	  limit: 10
-	})
-	.then(()=>{
-		self.originalLoading = false
-	})
-	
+	// var self =this;
+	// this.$store.dispatch("myPostOriginal", {
+	//   page: 1,
+	//   limit: 10
+	// })
+	// .then(()=>{
+	// 	self.originalLoading = false
+	// })
   },
 	methods: {
 		reinitPage(){
+			var self =this;
+			this.$store.dispatch("myPostOriginal", {
+			  page: 1,
+			  limit: 10
+			})
+			.then(()=>{
+				self.originalLoading = false
+			})
 			plus.navigator.setStatusBarStyle('dark');
 		},
 		swipeDeletePost(id){
@@ -250,15 +266,11 @@ export default {
 						})
 						.then(()=>{
 							self.shareLoading = false
-						})				  
+						})
 				  	}
 				  break;
 			}
 		},
-		goEval(id){
-			var self = this;
-			self.$f7.mainView.router.load({url:"evalDetail"+id});
-		}
 	}
 }
 </script>

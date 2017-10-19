@@ -2,9 +2,12 @@
 	<div class="share-row">
 		<div class="share-wrapper" v-if="list.length>0">
 			<f7-link v-for="share in list" :href="'/postDetail/'+share.id" class="recommend-post" :key="share.id">
-				<div class="image" >
+        <div class="image" >
+          <span class="post-multi-pics" v-if="share.files>1">
+            <img src="../assets/images/multi-image.png" alt="">
+          </span>
 					<div class="layer" :style="{backgroundImage: 'url(\''+share.cover+'\')'}">
-						
+
 					</div>
 					<span class="mark">晒物</span>
 				</div>
@@ -18,7 +21,7 @@
 			</f7-link>
 
 		</div>
-	</div>	
+	</div>
 </template>
 <style lang="less">
 .share-row{
@@ -29,13 +32,15 @@
     display: flex;
     overflow-x: scroll;
     padding: .4rem 0;
+	a{
+		opacity: 1!important;
+	}
     .recommend-post{
       background-color: #fff;
       margin-right:.26666667rem;
       border:5px solid #fff;
       border-radius: 2px;
       width: 4rem;
-      flex:1;
       .content{
         overflow: hidden;
         .title{
@@ -44,7 +49,7 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          font-weight: normal;         
+          font-weight: normal;
         }
       }
       .auth {
@@ -61,7 +66,7 @@
       }
       .image {
         width: 4rem;
-        height: 4rem;     
+        height: 4rem;
         position: relative;
         display: flex;
         align-items: flex-end;
@@ -78,7 +83,7 @@
           background-repeat: no-repeat;
           width: 4rem;
           height: 4rem;
-          z-index: 0;     
+          z-index: 0;
         }
 
         .mark{
@@ -94,14 +99,14 @@
           border-radius: 0 .18666667rem .18666667rem 0;
           text-align: center;
         }
-      }      
+      }
     }
 
   }
   width: 100%;
   box-sizing: border-box;
 
-}	
+}
 </style>
 <script>
 export default{

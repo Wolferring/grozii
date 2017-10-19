@@ -10,6 +10,7 @@ import news from './modules/news.js'
 import comment from './modules/comment.js'
 import evaluating from './modules/eval.js'
 import personal from './modules/personal.js'
+import topic from './modules/topic.js'
 Vue.use(Vuex)
 const store = new Vuex.Store({
     modules:{
@@ -22,7 +23,8 @@ const store = new Vuex.Store({
         evaluating,
         news,
         comment,
-        personal
+        personal,
+        topic
     },
     strict:process.env.NODE_ENV !== 'production'
 })

@@ -1,5 +1,5 @@
 <template>
-<f7-page 
+<f7-page
 class="home"
 id="homeView"
 toolbar-fixed
@@ -11,37 +11,51 @@ pull-to-refresh @ptr:refresh="refreshHome"
 infinite-scroll @infinite="scrollHome"
 :infinite-scroll-preloader='false'
 @page:beforeanimation="reinitPage()"
+
 >
-<f7-navbar class="no-border top" >
-      <f7-nav-left>
+<f7-navbar class="no-border" :class="{'top':isScrollTop}">
+    <f7-nav-left>
       </f7-nav-left>
       <f7-nav-center>
-
+      <transition name="fade">
+        <f7-link href="/search/" v-if="comConf.homeNavShow">
+          <div class="navbar-search">
+            <label for="#">
+              <i class="iconfont icon-Index_search_display"></i>
+            </label>搜索你感兴趣的内容
+          </div>
+        </f7-link>
+      </transition>
       </f7-nav-center>
       <f7-nav-right>
+      <transition name="fade">
+          <f7-link color="black" icon-only href="/news/" v-if="comConf.homeNavShow">
+              <i class="iconfont icon-index_notice" :class="{notify:comConf.hasNewMessage}">
 
+              </i>
+          </f7-link>
+      </transition>
       </f7-nav-right>
 </f7-navbar>
 <div class="home-banner">
-	<f7-swiper :params="homeBannerConfig" pagination id="homeBanner">
-	  <f7-swiper-slide v-for="banner in home.focus" :key="banner.title">
-		<f7-link href="/" @click="bannerRedirect(banner)">
+	<f7-swiper :params="homeBannerConfig" :init="false"  pagination id="homeBanner">
+	  <f7-swiper-slide v-for=" banner in home.focus" :data-banner="JSON.stringify(banner)" :key="banner.title">
+		<f7-link>
 		  	<img :src="banner.image" class="image" :alt="banner.title">
 		</f7-link>
 	  </f7-swiper-slide>
-
 	</f7-swiper>
 </div>
 <div class="banner-back"  slot="fixed">
 <transition name="fade">
 	<img src="../assets/images/banner-back.png" alt="" v-show="comConf.homeNavShow">
-	
+
 </transition>
-</div>	
+</div>
 <div class="section padding">
-	<div class="title border">
-		<h3>精选好文</h3>
-	</div>
+    <div class="title border">
+        <h3>精选好文</h3>
+    </div>
 	<div class="home-evals" v-if="home.evaluating">
 		<a :href="'/evalDetail/'+eval.id" class="home-eval-item border-bottom" v-for="eval in home.evaluating" :key="eval.id">
 			<div class="eval-img">
@@ -120,80 +134,61 @@ infinite-scroll @infinite="scrollHome"
 	</div>
 
 </div>
-<div class="section padding with-back">
-	<div class="title border">
-		<h3>精选晒物
-			<f7-link class="right transition" :class="{'text-blue':postMore,'text-disabled':!postMore}" :disabled="!postMore" @click="refreshPost">
-				<template v-if="postMore">
-					{{recommendPostLoading?"加载中":"换一批"}}
-				</template>
-				<template v-else>
-					{{postMore?"":"没有更多"}}
-				</template>
-			</f7-link>
-		</h3>
-	</div>
-	<div class="home-posts" v-if="home.share">
-		<a class="post-item" :href="'/postDetail/'+post.id" v-for="post in home.share" :key="post.id">
-			<div class="layer" :style="{backgroundImage: 'url(\''+post.cover+'\')'}">
-				
-			</div>
+<div class="section padding swiperflow">
+    <div class="postBgContainer">
+        <f7-swiper :init="false"  pagination id="BgBanner">
+          <f7-swiper-slide v-for="post in home.share" class="bg-banner">
+            <div class="layer"  :style="{backgroundImage: 'url(\''+post.cover+'\')'}">
 
-			<div class="info">
-				<div class="content">
-					<h3>{{post.title}}</h3>
-				</div>
-				<div class="auth">
-					<div class="author">
-						<span class="avatar">
-							<img :src="post.author.avatar" alt="">
-						</span>
-						<span class="name">
-							{{post.author.username}}
-						</span>
-					</div>
-					<div class="likes">
-						<span>
-							<i class="iconfont icon-index_like"></i>
-							{{post.diggs|convertNumber}}
-						</span>
-					</div>
-				</div>
-			</div>
-		</a>
-	</div>
-	<div class="home-posts" v-else>
-		<a class="post-item" href="#" v-for="n in 4">
-			<div class="layer">
-
-			</div>
-			<div class="info">
-				<div class="content">
-					<h3></h3>
-				</div>
-				<div class="auth">
-					<div class="author">
-						<span class="avatar">
-
-						</span>
-						<span class="name">
-							-
-						</span>
-					</div>
-					<div class="likes">
-						<span>
-							<i class="iconfont icon-index_comment"></i>
-							-
-						</span>
-						<span>
-							<i class="iconfont icon-index_good"></i>
-							-
-						</span>
-					</div>
-				</div>
-			</div>
-		</a>
-	</div>
+            </div>
+          </f7-swiper-slide>
+        </f7-swiper>
+    </div>
+    <div class="title-post">
+        <div class="title border">
+            <h3>精选晒物
+                <f7-link class="right transition" :class="{'text-disabled':!postMore}" :disabled="!postMore" @click="refreshPost">
+                    <template v-if="postMore">
+                        {{recommendPostLoading?"加载中":"换一批"}}
+                    </template>
+                    <template v-else>
+                        {{postMore?"":"没有更多"}}
+                    </template>
+                </f7-link>
+            </h3>
+        </div>
+    </div>
+    <div class="postItemContainer" ref="postContainer" >
+        <f7-swiper  :init="false" id="postBanner">
+          <f7-swiper-slide v-for="post in home.share" :data-url="'/postDetail/'+post.id" class="post-banner" >
+              <div class="banner-content">
+                  <div class="layer" :style="{backgroundImage: 'url(\''+post.cover+'\')'}">
+                  </div>
+                  <div class="info">
+                      <div class="content">
+                          <h3>{{post.title}}</h3>
+                      </div>
+                      <div class="auth">
+                          <div class="author">
+                              <span class="avatar">
+                                  <img :src="post.author.avatar" alt="">
+                              </span>
+                              <span class="name">
+                                  {{post.author.username}}
+                              </span>
+                          </div>
+                          <div class="likes">
+                              <span>
+                                  <i class="iconfont icon-index_good"></i>
+                                  {{post.diggs|convertNumber}}
+                              </span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </f7-swiper-slide>
+        </f7-swiper>
+    </div>
 </div>
 <div class="section">
 	<div class="title border">
@@ -205,27 +200,17 @@ infinite-scroll @infinite="scrollHome"
 		</transition>
 		<transition name="fade">
 			<feed-row :list="block.share" v-show="block"></feed-row>
-		</transition>		
-		
-<!-- 		<f7-swiper :params="recommendSwiperConfig" v-if="block.share.length>=1">
-			<f7-swiper-slide v-for="share in block.share" :key="share.id">
-				<f7-link :href="'/postDetail/'+share.id" class="recommend-post">
-					<div class="image" >
-						<div class="layer" :style="{backgroundImage: 'url(\''+share.cover+'\')'}">
-						</div>
-						<h3>{{share.title}}</h3>
-						<span class="mark">晒物</span>
-					</div>
-					<h3 class="auth">{{share.author.username}}</h3>
-				</f7-link>
-			</f7-swiper-slide>
-		</f7-swiper> -->
+		</transition>
+
 	</div>
 </div>
 <div class="text-center">
     <div class="preloader" v-if="guessLoading"></div>
     <p v-if="!guessMore&&!guessLoading" class="infinite-tip">没有更多了</p>
 </div>
+<template v-if="home">
+	<home-alert slot="fixed" :events="home.event"></home-alert>
+</template>
 <f7-toolbar
   tabbar
   labels
@@ -248,6 +233,9 @@ infinite-scroll @infinite="scrollHome"
 <script>
 import articleList from '../components/articleList.vue'
 import feedRow from '../components/feedRow.vue'
+import homeAlert from '../components/homeAlert.vue'
+import api from '../store/api.js'
+import htmlPlus from "../config/plusInit.js"
 export default{
 	data(){
 		return {
@@ -255,8 +243,26 @@ export default{
 				loop:true,
 				observer:true,
 				initialSlide:0,
-
 			},
+            postBgConfig:{
+                slidesPerView:1,
+                centeredSlides:true,
+                effect : 'fade'
+            },
+            postConfig:{
+                width:window.innerWidth,
+                effect:'coverflow',
+                slidesPerView:'auto',
+                centeredSlides:true,
+                slideToClickedSlide:true,
+                coverflow:{
+                    rotate:0,
+                    stretch:70,
+                    depth: 70,
+                    modifier: 2,
+                    slideShadows : true
+                }
+            },
 			homeSwiperConfig:{
 				slidesPerView:2.6,
 				spaceBetween:5,
@@ -281,6 +287,9 @@ export default{
 				page:2,
 				limit:5
 			},
+            slideleft:'',
+            cascadeListAll:[],
+            currentCascadeList:[],
 			guessLoading:false,
 			recommendPostLoading:false,
 			guessMore:true,
@@ -302,33 +311,88 @@ export default{
         },
         comConf(){
             return this.$store.getters.getComConf
-        },  
-         
+        },
+
         evalTypes(){
             return this.$store.getters.getEvalTypes
         },
+        isScrollTop(){
+          return this.scrolled>200?false:true
+        },
 	},
 	mounted(){
-        var tabHome = this.$$("#homeView"),
-        	self = this;
-        self.$store.dispatch("getRecommend",tabHome).then(function(){
-        	self.$f7.swiper("#home-topic-swiper",self.homeSwiperConfig)
-        	self.$$("#homeBanner")[0].swiper.reLoop();
-        	self.$$("#homeBanner")[0].swiper.slideTo(1)
-        },function(err){
+        var self = this;
+        self.slideleft = (window.screen.width/2 - 112.5)+'px'
+        self.$store.dispatch("getRecommend").then((data)=>{
+            self.$f7.swiper(self.$$("#homeBanner"),self.homeBannerConfig);
+            let bgSwiper = self.$f7.swiper(self.$$("#BgBanner"),self.postBgConfig);
+            let postSwiper = self.$f7.swiper(self.$$("#postBanner"),self.postConfig);
+            postSwiper.slideTo(1);
+            bgSwiper.slideTo(1);
+            postSwiper.params.control = bgSwiper;
+
+            postSwiper.on("transitionEnd",()=>{
+            	let index = postSwiper.activeIndex;
+            	self.$$("#postBanner .swiper-slide")
+            	.removeClass('active-click')
+            	.eq(index)
+            	.addClass('active-click')
+            })
+            
+        })
+        .catch(err=>{
         	let msg = err.msg||"遇到了未知错误"
         	self.$toast.center(msg)
         })
-        plus.navigator.setStatusBarStyle(self.scrolled>200?"dark":'light');
+        this.$$("#homeBanner").on('click', '.swiper-slide', function(event) {
+        	let data = JSON.parse(self.$$(this).data("banner"))
+        	self.bannerRedirect(data)
+        });
+        this.$$("#postBanner").on('click', '.active-click', function(event) {
+        	let url = self.$$(this).data("url")
+			var currentView = self.$f7.getCurrentView();
+			currentView.router.load({url:url});
+        });        
+		htmlPlus.bind(function(){
+	        plus.navigator.setStatusBarStyle(self.scrolled>200?"dark":'light');
+			var wgtVersion = plus.runtime.version,
+				osType = {"Android":"1","iOS":"0"}[plus.os.name]
+			api.checkAppUpdate({
+				type:osType,
+				version:wgtVersion
+			},function(data){
+				if(data.code == 2000){
+					var result = data.data;
+					var version = plus.storage.getItem('home_alert_version')
+					let buttons = ["前往更新"]
+					if(!result.is_force){
+						buttons.push("下次再说")
+					}
+					if(result.is_notify&&result.is_need){
+						plus.nativeUI.confirm(result.content, function(e){
+							if(e.index==0){
+								var url = {
+									"iOS":'itms-apps://itunes.apple.com/cn/app/id1274968835?l=zh&mt=8',
+									"Android":"market://details?id=com.grozii.android"}[plus.os.name]
+								plus.runtime.openURL(url);
+							}
+							plus.storage.setItem('home_alert_version',String(result.version))
+						}, "发现新版本", buttons);
+					}
+				}
+			})
+		})
+
 	},
 	methods:{
 		bannerRedirect(banner){
+            console.log(banner.data);
 			switch(banner.type){
 				case 2:
-				var self = this,
+				    var self = this,
 					currentView = self.$f7.getCurrentView();
 					currentView.router.load({url:"/postDetail/"+banner.data});
-					break;				
+					break;
 				case 1:
 				var self = this,
 					currentView = self.$f7.getCurrentView();
@@ -338,6 +402,11 @@ export default{
 				default :
 					this.tool.openWebview(banner.data,banner.title)
 					break;
+                case 3:
+                    var self = this,
+                    currentView = self.$f7.getCurrentView();
+                    currentView.router.load({url:"/topic/"+banner.data});
+                    break;
 
 			}
 		},
@@ -352,21 +421,22 @@ export default{
 					homeNavShow:true
 				})
 			}
-		},		
+		},
 		refreshHomeDone(){
 	        this.refreshing = false;
 			this.$store.commit("COM_CONF",{
 				homeNavShow:true
 			})
-		},		
+		},
 		refreshHome(){
 	        var tabHome = this.$$("#homeView .page-content"),
 	        	self = this;
 	        self.refreshing = true;
-            self.$store.dispatch("refreshRecommend",tabHome).then(function(){
+            self.$store.dispatch("refreshRecommend").then(function(data){
 	            self.$f7.pullToRefreshDone("#homeView .page-content")
-	        	self.$$("#homeBanner")[0].swiper.reLoop();
-	        	self.$$("#homeBanner")[0].swiper.slideTo(1);
+                self.$$("#homeBanner")[0].swiper.update();
+                self.$$("#postBanner")[0].swiper.update();
+                self.$$("#BgBanner")[0].swiper.update();
 				self.guessMore = true
 		    	self.guessLoading = false
 		    	self.homeGuess.page = 2
@@ -374,18 +444,20 @@ export default{
 				self.postMore = true;
     			self.$f7.attachInfiniteScroll(tabHome)
             },function(data){
-
+	            self.$f7.pullToRefreshDone("#homeView .page-content")
+	            self.$toast.center(data.msg||"未知错误")
             })
 		},
 		scollTop(){
 			let index = this.currentTab,
 				tab = this.$$("#homeView .page-content").eq(index),
 				scrollTop = tab.scrollTop()/2
-			tab.scrollTop(0, scrollTop>800?800:scrollTop)		
+			tab.scrollTop(0, scrollTop>800?800:scrollTop)
 		},
 	    reinitPage(){
 	    	let self = this
 	        plus.navigator.setStatusBarStyle(self.scrolled>200?'dark':"light");
+
 	    },
 		scrollHome(){
 	        var tabHome = this.Dom7("#homeView .page-content"),
@@ -434,11 +506,14 @@ export default{
 				this.recommendPostLoading = false
 				this.postMore = false;
 			})
+            self.$$("#BgBanner")[0].swiper.update();
+            self.$$("#postBanner")[0].swiper.update();
 		}
 	},
 	components:{
 		articleList,
-		feedRow
+		feedRow,
+		homeAlert
 	}
 }
 </script>
@@ -463,8 +538,21 @@ export default{
 			position: relative;
 			.swiper-container{
 				height: 100%;
+                a{
+                    opacity: 1!important;
+                }
 			}
 		}
+        .swiperflow{
+            background-color: rgba(0, 0 ,0,.2,);
+            padding:0!important;
+            .title-post{
+                padding: 0 10px;
+                h3,a{
+                    color: #fff;
+                }
+            }
+        }
 		.banner-back{
 			position: fixed;
 			top: 0;
@@ -613,9 +701,109 @@ export default{
 						}
 					}
 				}
-
 			}
 		}
+        .postItemContainer{
+            padding: 15px 0 50px;
+            .post-banner{
+            	width: 225px;
+                .banner-content{
+                    background-color: #fff;
+                    padding: 5px;
+                    border-radius: 3px;
+                    .layer{
+                        width: 215px;
+                        height: 215px;
+                        z-index: 0;
+                        margin: 0 auto;
+                        background-position: center;
+                        background-size: cover;
+                        img{
+                            margin:0 auto;
+                            max-width: initial;
+                            min-height:100%;
+                            min-width: 100%;
+                            width: 100%;
+                        }
+                    }
+                    .info{
+                        .content{
+                            h3{
+                                font-size: 14px;
+                                color:#333;
+                                height:48px;
+                                margin-top:10px;
+                                display: inline-block;
+                                padding: 0 5px;
+                                word-break:break-word;
+                                font-weight: 500;
+                            }
+                        }
+                        .auth{
+                            width: 100%;
+                            box-sizing: border-box;
+                            display: flex;
+                            color: #fff;
+                            align-items:flex-end;
+                            justify-content:space-between;
+                            font-size: 10px;
+                            padding: .16rem .21333333rem;
+                            .avatar{
+                                display: inline-block;
+                                width: .45333333rem;
+                                height: .45333333rem;
+                                vertical-align: middle;
+                                overflow: hidden;
+                                border-radius: 50%;
+                                img{
+                                    width: 100%;
+                                    height: 100%;
+                                }
+                            }
+                            .author{
+                                display: inline-block;
+                                .name{
+                                    color: #888;
+                                }
+                            }
+                            .likes{
+                                display: inline-block;
+                                color: #999;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .postBgContainer{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            .layer{
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                left: 0;
+                top: 0;
+                transform:scale(1.2);
+                background-position:center;
+                background-repeat: no-repeat;
+                background-size:cover;
+                filter:blur(10px);
+
+            }
+            .swiper-container{
+                height: 100%;
+                .bg-banner{
+
+                }
+                .swiper-slide{
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+        }
 		.home-posts{
 			display: flex;
 			align-items:center;
@@ -631,19 +819,18 @@ export default{
 				display: flex;
 				align-items:flex-end;
 				// background-color: #ccc;
-
 				background-size: 100%;
 				border-radius: 2px;
 				overflow:hidden;
 				margin-bottom: .16rem;
 				border:.5px solid #dedede;
 				.info{
-					position: relative;			
+					position: relative;
 					width: 100%;
 					height: 100%;
 					background: url('../assets/images/home-post-back.png');
 					background-position:bottom;
-					background-repeat: no-repeat;		
+					background-repeat: no-repeat;
 					background-size: 100%;
 					z-index: 1;
 					.auth{

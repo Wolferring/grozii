@@ -8,13 +8,18 @@
       </f7-link>
     </f7-nav-left>
     <f7-nav-center>
-      关注
+      关注({{followingInfo.length |convertNumber}})
     </f7-nav-center>
     <f7-nav-right>
     </f7-nav-right>
   </f7-navbar>
   <user-list :users="followingInfo" :type="'follow'"></user-list>
-  <p v-if="!followingInfo.length" class="no-more">你还没有关注任何人</p>
+  <template v-if="!followingInfo.length">
+    <div class="no-message-container">
+      <img src="../assets/images/no-user.png" alt="">
+      <p class="no-any-message">你还没有关注任何人</p>
+    </div>
+  </template>   
 </f7-page>
 </template>
 <style lang="less">
@@ -38,11 +43,14 @@ import userList from '../components/userList.vue'
 export default {
   data() {
     return {
-	};
+  	}
   },
   mounted() {},
   components: {
     userList
+  },
+  destroyed() {
+    this.$store.dispatch("getUserInfo")
   },
   computed: {
     followingInfo() {

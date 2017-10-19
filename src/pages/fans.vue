@@ -9,14 +9,19 @@
       </f7-link>
     </f7-nav-left>
     <f7-nav-center>
-      粉丝
+      粉丝({{followerInfo.length |convertNumber}})
     </f7-nav-center>
     <f7-nav-right>
 
     </f7-nav-right>
   </f7-navbar>
   <user-list :users="followerInfo" :type="'fans'"></user-list>
-  <p v-if="!followerInfo.length" class="no-more">你还没有粉丝</p>
+  <template v-if="!followerInfo.length">
+    <div class="no-message-container">
+      <img src="../assets/images/no-user.png" alt="">
+      <p class="no-any-message">你还没有粉丝</p>
+    </div>
+  </template>   
 </f7-page>
 </template>
 <style lang="less">

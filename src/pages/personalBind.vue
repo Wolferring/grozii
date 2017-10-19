@@ -23,9 +23,8 @@
                     </div>
                     </f7-label>
                     <f7-input 
-                        maxlength=11  
-                        type="tel" 
-                        id="phone"
+                        id="username"
+                        type="text" 
                         v-model="models.username"
                         :placeholder="authInfo.username"
                         v-once
@@ -209,10 +208,14 @@ export default {
 	methods:{
 		sendVerify(){
             var self = this;
+            try{
+                plus.nativeUI.showWaiting()
+            }catch(e){}
             api.getVerifyCode({
                 mobile:this.models.mobile,
                 type:3
             },function(data){
+                plus.nativeUI.closeWaiting()
                 if(data.code!=2000){
                     self.showErrorMessage(data.msg);
                     return false;

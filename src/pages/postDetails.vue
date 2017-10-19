@@ -9,11 +9,11 @@ no-toolbar
 >
 	<f7-navbar class="navbar-hidden">
     </f7-navbar>
-	<f7-progressbar v-show="!contentReady" infinite color="green"></f7-progressbar>
+	<f7-progressbar v-show="!contentReady||!imageReady" infinite color="green"></f7-progressbar>
 	<div class="container">
 		<div class="head-image-box"  id="headImage">
 			<f7-swiper pagination v-if="detail.attaches" :params="{speed:500,autoHeight:true}" id="postDetailAttach">
-				<f7-swiper-slide v-for="(banner,index) in detail.attaches" :key="banner.id">
+				<f7-swiper-slide class="has-action" :data-banner="banner" v-for="(banner,index) in detail.attaches" :key="banner.id">
 						<img src="../assets/images/post-detail-layer.png" class="head-image-box-cover" alt="" >
 						<template v-if="index==0">
 							<transition name="fade">
@@ -60,6 +60,9 @@ no-toolbar
 						</p>
 					</div>
 				</transition>
+				<div class="content-report" v-show="contentReady">
+					<f7-link  @click="$router.load({url: '/userReport/',query:{'report_link_type':'2','report_link_id':detail.id}})" class="color-danger"><i class="iconfont icon-jubao"></i> 内容举报</f7-link>
+				</div>
 				<div inner
 					v-if="!contentReady&&!requestError"
 				>
@@ -110,7 +113,7 @@ no-toolbar
 	<div slot="fixed" class="footer">
 			<div class="footer-all" v-if="detail.extra">
 			<f7-grid>
-				<f7-link :href="'/comments/'+detail.id" class="col-auto footer-item">
+				<f7-link :href="'/comments/post/'+detail.id" class="col-auto footer-item">
 		      		<i class="iconfont icon-comment icon-only"></i>
 		      		<span>{{detail.replies}}</span>
 				    <span class="rightLine"></span>
@@ -309,7 +312,6 @@ no-toolbar
 				height: 0.64865rem;
 				line-height: 0.64865rem;
 				margin:20px auto;
-				margin-bottom: 10px;
 				padding: 0 .53333333rem;
 				font-size: 13px;
 				color: #999;
@@ -346,12 +348,24 @@ no-toolbar
 					}
 				}
 			}
+			.content-report{
+				color: #f34848;
+				text-align: right;
+				padding: 10px 0;
+				a{
+					color: inherit;
+				}
+				font-size: 12px;
+				.iconfont{
+					font-size: 12px;
+				}
+			}
 			.content-text{
-				padding:5px .53333333rem;
+				padding:10px .53333333rem;
 				overflow: hidden;
 				font-size:15px;
 				line-height: 1.8;
-				color: #333;
+				color: #555;
 				.content-block{
 					margin:10px 0 0 0;
 					.content-inner-block{
@@ -414,7 +428,7 @@ no-toolbar
 		}
 		.back-share-span{
 			display: inline-block!important;
-			font-size: 0.48649rem;
+			font-size: 18px;
 			font-weight: bold;
 			color: rgba(0, 0, 0, 0);
 		}
@@ -471,10 +485,60 @@ export default {
     };
   },
   mounted(){
+  	var self = this;
   	this.$$("#post-detail .page-content").on("scroll",function(e){
   		e.preventDefault()
   		e.stopPropagation()
-  	})  	
+  	})
+  	this.$$("#post-detail").on("taphold",".swiper-slide.has-action",function(){
+  		let image = self.$$(this).data("banner"),
+  			imageName = '_downloads/'+(new Date().getTime())+".jpg";
+  		console.log(imageName)
+		plus.nativeUI.actionSheet({
+			cancel:"取消",
+			buttons:[{title:"保存图片"}]
+		}, function(e){
+			if(e.index==1){
+				var w=plus.nativeUI.showWaiting("开始下载");
+				var dtask = plus.downloader.createDownload(image, {
+					filename:imageName
+				}, function ( d, status ) {
+					// 下载完成
+					console.log(d)
+					if ( status == 200 ) { 
+						console.log("下载完成")
+						plus.gallery.save(imageName,function() {
+							self.$toast.center('保存成功');
+						}, function() {
+							self.$toast.center('保存失败，请重试');
+						});						
+					} else {
+						 self.$toast.center( "保存失败，请重试"); 
+					}  
+					plus.downloader.clear();
+				});
+				dtask.addEventListener( "statechanged", function(task,status){
+					switch(task.state) {
+						case 1: // 开始
+							w.setTitle("开始下载");
+						break;
+						case 2: // 已连接到服务器
+							w.setTitle("开始下载");
+						break;
+						case 3:
+							var a = task.downloadedSize/task.totalSize*100;
+							w.setTitle("已下载"+parseInt(a)+"%");
+						break;
+						case 4: // 下载完成
+							w.close();
+						break;
+					}
+				})		
+				dtask.start(); 	
+
+			}
+		});		
+  	})
   },
   components: {
     share
@@ -505,7 +569,7 @@ export default {
 	    	this.$store.dispatch("deletePost",{id:id})
 	    	.then(data=>{
 	    		this.$router.back();
-	    		$this.$toast.center("删除成功")
+	    		this.$toast.center("删除成功")
 		    	this.actionShow = false
 	    	})
 	    	.catch(e=>{
@@ -515,17 +579,21 @@ export default {
 		}
 		plus.nativeUI.confirm("确认删除这条晒物?", function(e){
 			if(e.index==0){
-		    	this.$store.dispatch("deleteEval",{id:id})
+		    	self.$store.dispatch("deletePost",{id:id})
 		    	.then(data=>{
-		    		this.$router.back();
-		    		$this.$toast.center("删除成功")
-			    	this.actionShow = false
+		    		self.$router.back();
+		    		self.$toast.center("删除成功")
+			    	self.actionShow = false
 		    	})
 		    	.catch(e=>{
-		    		this.$toast.center(e.msg||"删除失败，请重试")
+		    		self.$toast.center(e.msg||"删除失败，请重试")
 		    	})
 			}
-		}, "确认删除", ["删除","取消"] );      	
+		}, "确认删除", ["删除","取消"] );
+    },
+
+    saveImage(url){
+    	alert(url)
     },
     pageAnimated(){
     	this.animateReady = true;
@@ -548,7 +616,7 @@ export default {
 			self.requestReady = true;
 	    	self.requestError = true
 	    })
-	    this.$store.commit("changeReplyType", this.replyPost)
+	    //this.$store.commit("changeReplyType", this.replyPost)
     },
 	reinitPage(){
 		const deviceWidth = window.screen.width;
@@ -563,7 +631,7 @@ export default {
 			self.requestReady = true;
 	    	self.requestError = true
 	    })
-	    this.$store.commit("changeReplyType", this.replyPost)
+	    //this.$store.commit("changeReplyType", this.replyPost)
 	    self.statusStyle = plus.navigator.getStatusBarStyle()||"dark"
 		plus.navigator.setStatusBarStyle('light');
 	},

@@ -7,11 +7,10 @@ const state = {
 }
 
 const actions = {
-	refreshRecommend({commit},dom){
+	refreshRecommend({commit}){
         return new Promise((resolve,reject)=>{
             api.getRecommendList(function(data){
                 if(data.code!=2000){
-                    window.f7.pullToRefreshDone(dom)
                     reject(data)
                     return false;
                 }
@@ -51,7 +50,6 @@ const actions = {
         return new Promise((resolve,reject)=>{
             api.getRecommendList(function(data){
                 if(data.code!=2000){
-                    window.f7.pullToRefreshDone(dom)
                     reject(data)
                     return false;
                 }

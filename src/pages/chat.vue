@@ -1,5 +1,5 @@
 <template>
-<f7-page navbar-fixed no-toolbar pull-to-refresh navbar-through class="chat-page" @ptr:refresh="onRefresh">
+<f7-page navbar-fixed no-toolbar navbar-through id="chat-page" class="chat-page">
   <f7-navbar sliding class="navbar-black">
     <f7-nav-left>
       <f7-link icon-only back>
@@ -55,9 +55,9 @@
         <input id="replying" @focus="replyCom" @blur="blur" v-model="messageReply" type="text" name="replying" placeholder="回复">
       </form>
     </div>
-    <div class="reply-btn" :disabled="!validComment" :class="{'text-sub':validComment}" @click="submitChat">
+    <a class="reply-btn" :disabled="!validComment||sending" :class="{'text-sub':validComment}" @click="submitChat">
       发送
-    </div>
+    </a>
   </div>
 </f7-page>
 </template>
@@ -70,7 +70,7 @@
       padding-top: 64px!important;
     }
     .message-date {
-        font-size: 0.32432rem;
+        font-size: 12px;
         text-align: center;
         color: #999;
         margin-bottom: 0.27027rem;
@@ -109,7 +109,7 @@
                         border-radius: 0.10811rem;
                         position: relative;
                         p {
-                            font-size: 0.37838rem;
+                            font-size: 14px;
                             font-weight: 500;
                             color: #000;
                         }
@@ -142,7 +142,7 @@
                         border-radius: 0.10811rem;
                         position: relative;
                         p {
-                            font-size: 0.37838rem;
+                            font-size: 14px;
                             font-weight: 500;
                             color: #fff;
                         }
@@ -153,7 +153,7 @@
                             top: 0.27027rem;
                             right: -5px;
                             border-top: 5px solid transparent;
-                            border-left: 5px solid #17e6d5;
+                            border-left: 5px solid @sub-color;
                             border-bottom: 5px solid transparent;
                         }
                     }
@@ -170,9 +170,9 @@
         justify-content: space-around;
         bottom: 0;
         width: 100%;
-        height: 1.45946rem;
+        height: 50px;
         background-color: #fff;
-        border: solid 0.013514rem #ebebeb;
+        border: solid .5px #ebebeb;
         z-index: 100;
         // text-align: center;
         .active-state {
@@ -181,52 +181,30 @@
         .reply-input {
             flex: 1;
             display: relative;
-            line-height: 1.45946rem;
+            line-height: 50px;
             padding: 0;
             padding-left: 15px;
         }
         .reply-btn {
             padding: 0 15px;
-            display: relative;
-            line-height: 1.45946rem;
+            line-height: 50px;
+            font-size: 14px;
+            
         }
         input {
             width: 100%;
             height: 0.89189rem;
             line-height: .32rem;
-            border-radius: 4px;
+            border-radius: 2px;
             background-color: #fbfbfb;
             border: solid 0.5px #ebebeb;
-            padding-left:  0.5rem;
+            padding-left: 15px;
             text-align: left;
             box-sizing: border-box;
-        }
-        label {
-            position: absolute;
-            top: 0.27027rem;
-            // width: 100%;
-            height: 0.89189rem;
-            line-height: 0.89189rem;
-            border-radius: 0.16216rem;
-            background-color: #fbfbfb;
-            text-align: center;
-            font-size: 0.32432rem;
-            color: #666;
-            left: 50%;
-            -webkit-transform: translateX(-50%);
-            -moz-transform: translateX(-50%);
-            -o-transform: translateX(-50%);
-            -ms-transform: translateX(-50%);
-            transform: translateX(-50%);
-            img {
-                width: 0.32432rem;
-                margin: 12px auto 0;
-                vertical-align: middle;
-                padding-right: 0.13514rem;
-            }
+            font-size: 14px;
         }
         input::placeholder {
-            font-size: 0.37838rem;
+            font-size: 14px;
             font-weight: 500;
             color: #666;
         }
@@ -239,16 +217,19 @@ export default {
   data() {
     return {
       messageReply: '',
-      messageSender: this.$route.params.pid,
+      messageSender: this.$route.params.chatid,
       screenHeight: '',
-      timer:""
+      timer:"",
+      sending:false
     }
   },
   created() {
 
   },
   mounted() {
-    this.$store.dispatch("getNewsMessage", this.$route.params.pid)
+    this.$store.dispatch("getNewsMessage", this.$route.params.pid).then(e=>{
+      this.scrollBottom()
+    })
     this.screenHeight = window.innerHeight
   },
   computed: {
@@ -257,32 +238,32 @@ export default {
     },
     validComment(){
         return this.messageReply.length>2
-    },        
+    },
   },
   methods: {
     replyCom() {
       const nowHeight = this.screenHeight - window.innerHeight;
       document.getElementById('chatContent').style.paddingBottom = nowHeight + 'px';
-      this.timer = setInterval(function() {
-          document.body.scrollTop = document.body.scrollHeight;
-      }, 300)        
+      setTimeout(()=>{
+        this.scrollBottom()        
+      },400)
+      // this.timer = setInterval(function() {
+      //     document.body.scrollTop = document.body.scrollHeight;
+      // }, 300)
+    },
+    scrollBottom(){
+      var page = this.$$("#chat-page .page-content")
+      page.scrollTop(page.find(".container").height(),200)
     },
     blur() {
-      clearTimeout(self.timer)
+      // clearTimeout(self.timer)
 
     },
     showmore() {
 
     },
-    onRefresh() {
-      var self = this;
-      self.$store.dispatch("getNewsMessage", this.$route.params.pid).then(function() {
-        self.$f7.pullToRefreshDone()
-      }, function(data) {
-
-      })
-    },
     submitChat() {
+
       let replyInfo = {
         user_id: this.messageSender,
         content: this.messageReply,
@@ -291,14 +272,21 @@ export default {
       if (this.messageReply == '') {
         self.$toast.center("回复内容不能为空!");
       } else {
-        this.$store.dispatch("replyMessage", replyInfo).then(function(data) {
+        self.sending = true
+        this.$store.dispatch("replyMessage", replyInfo)
+        .then((data)=>{
             self.$toast.center("回复成功");
-            var refersh = setTimeout(
-              self.$store.dispatch("getNewsMessage", self.$route.params.pid).then(function() {
-                self.messageReply = '';
-              }, function(data) {}), 2000)
-          }),
-          function() {}
+            self.messageReply = '';
+            self.sending = false
+            self.$store.dispatch("getNewsMessage", self.$route.params.chatid)
+            .then(e=>{
+                this.scrollBottom();
+            })
+        })
+        .catch(e=>{
+          this.$toast.center(e.msg||"发送失败")
+          self.sending = false
+        })
       }
     }
   }

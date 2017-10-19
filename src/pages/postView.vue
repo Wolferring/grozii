@@ -8,6 +8,7 @@
   @touchstart="touchStartPostList()"
   @touchend="touchEndPostList()"
   @page:beforeanimation="reinitPage()"
+
 >
 <f7-navbar class="no-border">
       <f7-nav-left>
@@ -38,13 +39,14 @@
 </f7-navbar>
 <f7-page-content
   tab
+  
   v-for="(tab,index) in types"
   :key="index"
   :active="index==0"
   :id="'tab-post-'+index"
   @tab:show="tabShow(index)"
   class="pull-to-refresh-content with-subnavbar infinite-scroll"
-  data-distance="400"
+  data-distance="600"
   >
     <div class="pull-to-refresh-layer">
       <div class="preloader"></div>
@@ -60,8 +62,10 @@
             :src="item.cover"
             v-once
             :height="(item.cover||'')|getHeightFromUrl"
-
             >
+          <span class="post-multi-pics" v-if="item.files>1">
+            <img src="../assets/images/multi-image.png" alt="">
+          </span>             
           </div>
           <h3 class="title">{{item.title|titleFilter}}</h3>
           <div class="auth">
@@ -89,6 +93,9 @@
                 v-once
                 :height="(item.cover||'')|getHeightFromUrl"
                 >
+              <span class="post-multi-pics" v-if="item.files>1">
+                <img src="../assets/images/multi-image.png" alt="">
+              </span>                  
               </div>
               <h3 class="title">{{item.title|titleFilter}}</h3>
               <div class="auth">
@@ -108,7 +115,7 @@
 
       </div>
     </div>
-    
+
     <div class="infinite-scroll-preloader" v-if="types&&postList[tab.id]">
         <div class="preloader" v-show="types[index]['query']['more']&&postList[tab.id].list.length"></div>
         <p v-show="!types[index]['query']['more']||!postList[tab.id].list.length" class="infinite-tip">没有更多了</p>
@@ -124,7 +131,7 @@
     </f7-link>
     <f7-link  tab-link="#tab-eval">
       <img src="../assets/images/icons/eval.png" alt="">
-    </f7-link> 
+    </f7-link>
     <f7-link  tab-link="#tab-post" @click="postScrollTop">
           <img src="../assets/images/icons/post-active.png">
     </f7-link>
@@ -217,6 +224,7 @@ export default {
                   self.$store.commit("postPageQuery",{
                       id:self.currentTab,
                       query:{
+                          more:true,
                           page:self.types[self.currentTab]["query"]["page"] + 1
                       }
                   })
@@ -247,9 +255,6 @@ export default {
     postList(){
         return this.$store.getters.getPostList
     },
-    baseRem(){
-      return parseFloat(document.documentElement.style.fontSize)/37.5
-    },
     user(){
       return this.$store.getters.getUser
     }
@@ -263,12 +268,12 @@ export default {
       if(info.length<=0){
         return false
       }
-      172/info[0]
-      return parseInt(info[1].replace("_thumb","")*(172/info[0]))
+      let colW = parseFloat(document.documentElement.style.fontSize)*4.58666667
+      return parseInt(info[1].replace("_thumb","")*(colW/info[0]))
     },
     titleFilter(title){
       return title.length>30?(title.slice(0,30)+"..."):title
-    }    
+    }
   },
   methods: {
     tabShow(tab){
@@ -282,7 +287,7 @@ export default {
           tab = this.$$("#postView .page-content").eq(index),
           scrollTop = tab.scrollTop()/2
       tab.scrollTop(0, scrollTop>800?800:scrollTop)
-    },    
+    },
     touchStartPostList(){
       clearTimeout(this.scrollTimer)
       this.openPostCreateShow = false
@@ -291,7 +296,7 @@ export default {
       this.scrollTimer = setTimeout(()=>{
         this.openPostCreateShow = true
       },750)
-    },       
+    },
     openPostCreate(){
         var self = this;
         if(this.$store.getters.userHasLogin){

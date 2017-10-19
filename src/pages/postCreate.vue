@@ -1,6 +1,6 @@
 <template>
-	<f7-page class="no-toolbar post-create" 
-		navbar-fixed 
+	<f7-page class="no-toolbar post-create"
+		navbar-fixed
 		@page:beforeinit="beforeInit"
 		@page:back="beforeBack"
 		>
@@ -8,7 +8,7 @@
           <f7-nav-left>
 	    	<f7-link back icon-only>
 				<i class="iconfont icon-back">
-					
+
 				</i>
 	    	</f7-link>
           </f7-nav-left>
@@ -20,14 +20,14 @@
           		发布
           	</f7-link>
           </f7-nav-right>
-	    </f7-navbar>		
+	    </f7-navbar>
 	    <div class="create-container">
 	    	<div class="padding background border-bottom">
 		    	<div class="input-cate grid">
 		    		<label for="null">选择分类:</label>
 		    		<f7-link class="cate btn border" :class="{'active':models.cate==cate.id}" @click="setCate(cate.id)" v-for="(cate,index) in postTypes" :key="index">{{cate.name}}</f7-link>
 		    	</div>
-	    	</div>	
+	    	</div>
 	    	<div class="padding input-title ">
 	    	<div class="border-bottom">
 				<input type="text" class="input "  maxlength="30" v-model="models.title" placeholder="起一个酷酷的标题">
@@ -39,14 +39,14 @@
 	    	<div class="padding input-content">
 				<textarea type="textarea" v-model="models.content" rows="4" :placeholder="contentPlace.content"></textarea>
 				<span class="count">{{200-models.content.length}}</span>
-	    	</div>	    	
+	    	</div>
 
 	    	<div class="padding">
 	    		<div class="input-container">
 		    		<div class="input-images grid">
 		    			<f7-link @click="showActions(index)" v-for="(image,index) in models.imageUrlList" class="image" :key="index">
 		    				<img :src="image" alt="">
-		    			</f7-link>   				    			
+		    			</f7-link>
 		    			<div class="image image-upload">
 		    				<f7-link @click="chooseImage">
 		    					<img src="../assets/images/postChooseImage.jpg" alt="">
@@ -56,7 +56,7 @@
 	    		</div>
 	    	</div>
 	    </div>
-		<f7-actions :opened="actionOpen" @actions:close="actionOpen=false">
+		<f7-actions :opened="actionOpen" @actions:close="actionOpen==false">
 		  <!-- Actions Group -->
 		  <f7-actions-group>
 		    <!-- Actions Label -->
@@ -68,7 +68,7 @@
 		    <!-- Cancel/Close Button -->
 		    <f7-actions-button @click="hideAction">取消</f7-actions-button>
 		  </f7-actions-group>
-		</f7-actions>	    
+		</f7-actions>
 	</f7-page>
 </template>
 <style lang="less">
@@ -90,7 +90,7 @@
 				border: .5px solid #666;
 				font-size: 13px;
 				color:#666;
-				padding:0 13px; 
+				padding:0 13px;
 				margin: 0;
 				transition:none;
 				&.active{
@@ -109,8 +109,8 @@
 				color:#333;
 				padding: 12px 0;
 				width: 100%;
-				user-select:auto; 
-				-webkit-user-select:auto;					
+				user-select:auto;
+				-webkit-user-select:auto;
 			    -webkit-appearance: none;
 			    border-radius: 0;
 			    padding-right: 15px;
@@ -139,7 +139,7 @@
 				padding: 10px 0;
 				user-select:auto;
 				-webkit-user-select:auto;
-				font-size: 15px;					
+				font-size: 15px;
 				color: #333;
 			}
 			.count{
@@ -150,7 +150,7 @@
 				color:#999;
 
 			}
-		}		
+		}
 		.input-container{
 			width: 100%;
 			overflow:hidden;
@@ -220,21 +220,21 @@
 					tabPostShow:true,
 					narbarShadow:false
 				})
-			},	
+			},
 			setCate(cate){
 				this.models.cate = cate
-			},	
+			},
 			showActions(index){
 				this.actionOpen = true
 				this.actionIndex = index
-			},	
+			},
 			hideAction(){
 				this.actionOpen = false
-			},	
+			},
 			removeImage(){
 				console.log(this.actionIndex)
 				this.models.imageUrlList.splice(this.actionIndex,1)
-			},		
+			},
 			chooseImage(){
 				var self = this;
 				if(self.models.imageUrlList.length>9){
@@ -249,7 +249,7 @@
 					}
 			    }, function (e) {
 			    	console.log( "取消选择图片" );
-			    }, {filter:"image",system:false,maximum:9,multiple:true,selected:self.models.imageUrlList});				
+			    }, {filter:"image",system:false,maximum:9,multiple:true,selected:self.models.imageUrlList});
 			},
 			showImage(url){
 			    var self = this;
@@ -257,11 +257,11 @@
 			},
 			sendShare(){
 				let self = this;
-				var task = plus.uploader.createUpload("http://api.gwz.eptonic.biz/v1/post", 
+				var task = plus.uploader.createUpload("http://api.gwz.eptonic.biz/v1/post",
 					{ method:"POST",blocksize:204800,priority:100},
 					function (t,status ) {
 						// 上传完成
-						if (status == 200){ 
+						if (status == 200){
 							alert( "Upload success: " + JSON.parse(t.responseText).msg );
 							let result = JSON.parse(t.responseText)
 							if(result.code!=2000){
@@ -279,7 +279,7 @@
 					console.log(self.models.imageUrlList[file])
 					task.addFile(self.models.imageUrlList[file]);
 				}
-				task.addData( "title", self.models.title );								
+				task.addData( "title", self.models.title );
 				task.addData( "content", self.models.content );
 				task.addData( "cate", String(self.models.cate));
 				task.start()
@@ -294,7 +294,7 @@
 			// this.$$('.subnavbar').hide();
 		},
 		beforeDestroy(){
-			
+
 		},
 		computed:{
 	        postTypes(){

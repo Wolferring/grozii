@@ -19,11 +19,13 @@ const actions = {
                     type[i] = Object.assign(type[i],{query:{
                         page:2,
                         limit:6,
+                        sort:1,
                         more:true,
-                        type:type[i].id
+                        type:type[i].id,
+                        filter:"all",
+                        tags:[]
                     }})
                 }
-                console.log(type)
                 resolve(data)
                 commit(types.EVAL_TYPE,type)
             })
@@ -53,18 +55,6 @@ const actions = {
             })
         })
     },
-    refreshEvalList({commit},payload){
-        return new Promise((resolve,reject)=>{
-            api.getArticleList(payload,function(data){
-                if(data.code!=2000){
-                    reject(data)
-                    return false;
-                }
-                commit("evalListRefresh",data.data)
-                resolve(data.data)
-            })
-        })
-    },
     getEvalFirstList({commit},payload){
         let query = {
             limit:6,
@@ -87,7 +77,7 @@ const actions = {
                     reject(data)
                     return false;
                 }
-                resolve(data.data)                
+                resolve(data)
             })
         })
     }
@@ -100,6 +90,7 @@ const getters = {
 
 const mutations = {
     [types.EVAL_LIST](state,list){
+        console.log(list)
         state.list = list;
     },
     [types.EVAL_TYPE](state,types){
@@ -118,6 +109,11 @@ const mutations = {
     },
     evalListRefresh(state,data){
         state.list[data.cate_id].list = data.list
+    },
+    clearEvalList(state,id){
+        let type = state.types[id]['query']['type']
+        console.log()
+        state.list[type].list = []
     }
 }
 

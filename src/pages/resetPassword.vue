@@ -95,10 +95,11 @@
 					height: 1.17333333rem;
 					line-height: 1.17333333rem;
 					padding: 0 .34666667rem;
-					i{
-						font-size: 25px;
-					}
 					color: #000;
+                    .iconfont{
+                        font-size: 20px;
+                        color: #666;
+                    }
 				}
 				.item-input{
 					height: 1.17333333rem;

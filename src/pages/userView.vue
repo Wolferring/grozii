@@ -2,12 +2,11 @@
 <f7-page
   toolbar-fixed
   no-navbar
-  navbar-through
   id="userView"
   @page:beforeanimation="reinitPage()"
 
 >
-<f7-navbar sliding class="navbar-hidden">
+<f7-navbar class="navbar-hidden">
 	<f7-nav-left>
 	<f7-link icon-only back>
 		<i class="iconfont icon-back">
@@ -16,7 +15,7 @@
 	</f7-link>
 	</f7-nav-left>
 	<f7-nav-center>
-		消息
+		
 	</f7-nav-center>
 	<f7-nav-right>
 
@@ -29,9 +28,11 @@
 		</div>
 		<div class="user-avatar">
 			<div class="avatar">
-				<img v-if="hasLogin" :src="user.avatar" />
-				<f7-link @click="openLogin">
-					<img v-if="!hasLogin" src="../assets/images/loginavatar.jpg" alt="">
+				<f7-link v-if="hasLogin" @click="openImageBrowser(user.avatar)">
+					<img  :src="user.avatar" />
+				</f7-link>
+				<f7-link @click="openLogin" v-else>
+					<img src="../assets/images/loginavatar.jpg" alt="">
 				</f7-link>
 			</div>
 		</div>
@@ -225,13 +226,27 @@
 			}
 		},
 		methods: {
-			move(e){
-
-			},
 			openLogin(){
 				this.$store.commit("COM_CONF",{
 					isLoginScreenShow:true,
 				})
+			},
+			openImageBrowser(img){
+				let browser = this.$f7.photoBrowser({
+				    zoom: 400,
+				    theme:"dark",
+				    navbar:false,
+				    backLinkText:"返回",
+				    ofText:"用户头像",
+				    toolbar:false,
+				    photos: [img],
+				    exposition:false,
+				})
+				browser.open()
+				browser.swiper.on("click",()=>{
+					browser.close()
+				})
+
 			},
 		    reinitPage(){
 		        plus.navigator.setStatusBarStyle('light');

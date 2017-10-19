@@ -7,36 +7,12 @@
           active 
           id="tab-home"
           class="with-subnavbar"
-          :dynamic-navbar="true"
+          :dynamic-navbar="false"
           @tab:show="homeTabShow('tab-home')"
           @tab:hide="homeTabHide('tab-home')"          
           >
             <!-- Pages -->
-            <f7-navbar class="no-border" :class="{'top':isScrollTop}">
-                <f7-nav-left>
-                  </f7-nav-left>
-                  <f7-nav-center>
-                  <transition name="fade">
-                    <f7-link href="/search/" v-if="comConf.homeNavShow">
-                      <div class="navbar-search">
-                        <label for="#">
-                          <i class="iconfont icon-Index_search_display"></i>
-                        </label>
-                        搜索你感兴趣的内容
-                      </div>
-                    </f7-link>
-                  </transition>
-                  </f7-nav-center>
-                  <f7-nav-right>
-                  <transition name="fade">
-                      <f7-link color="black" icon-only href="/news/" v-if="comConf.homeNavShow">
-                          <i class="iconfont icon-index_notice" :class="{notify:comConf.hasNewMessage}">
 
-                          </i>
-                      </f7-link>
-                  </transition> 
-                  </f7-nav-right>
-            </f7-navbar>
             <f7-pages>
                 <home-view :scrolled="homeScrollTop">
                   
@@ -272,7 +248,11 @@ opened
             homeNavShow:true
           })
         }
-        plus.navigator.setStatusBarStyle(self.homeScrollTop>200?"dark":'light');
+        let statusType = plus.navigator.getStatusBarStyle(),
+            statusTypeWill = self.homeScrollTop>200?"dark":'light';
+        if(statusType!=statusTypeWill){
+            plus.navigator.setStatusBarStyle(statusTypeWill);
+        }
 
       });
     },
@@ -296,6 +276,15 @@ opened
           this.$store.dispatch("getEvalTypes")          
         },
         closeGuide(){
+            if(this.$device.ios){
+                this.$store.dispatch("getPostTypes")
+                this.$store.dispatch("getEvalTypes")   
+                this.$store.dispatch("getRecommend").then(()=>{
+                  //this.$f7.swiper("#home-topic-swiper",self.homeSwiperConfig)
+                  // this.$$("#homeBanner")[0].swiper.reLoop();
+                  this.$$("#homeBanner")[0].swiper.slideTo(1)
+                })                            
+            }
             this.$f7.closeModal("#launch-popup")
             plus.storage.setItem("launchFlag","true")
         },

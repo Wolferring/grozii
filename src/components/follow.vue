@@ -105,11 +105,11 @@
         },
         methods:{
             changeFollow(){
-              this.ifFollow = !this.ifFollow
               this.following = true
               this.$store.dispatch('followUser',{uid:this.followId})
               .then(()=>{
                 this.following = false
+                this.ifFollow = !this.ifFollow
                 this.$store.dispatch("getUserInfo")
                 
               })

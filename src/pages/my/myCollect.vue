@@ -16,7 +16,7 @@ id='myCollect'
       </f7-link>
     </f7-nav-left>
     <f7-nav-center>
-      收藏
+      我收藏的
     </f7-nav-center>
     <f7-nav-right>
     </f7-nav-right>
@@ -30,16 +30,18 @@ id='myCollect'
     </f7-subnavbar>
   </f7-navbar>
 
-  <div class="info-container">
-    <f7-tabs class="search-result">
+  <div class="collect-container">
+    <f7-tabs class="collect-tabs">
       <f7-tab id="original" active @tab:show.prevent.stop="tabShow('original')">
         <div class="loader text-center" v-if="originalLoading">
           <f7-preloader></f7-preloader>
-        </div>      
+        </div>
         <f7-list media-list class="no-top-border article-list-comp" no-border>
           <a :href="'/evalDetail/'+ item.id" v-for="item in myCollOri">
             <f7-list-item class="article-item-comp list-no-type">
               <img :src="item.cover" slot="media" alt="">
+              <span class="label label-digest" slot="media-start" v-if="item.is_digest">精华</span>
+              
               <div class="content">{{item.content}}</div>
               <div class="auth">
                 <div class="author">
@@ -65,16 +67,16 @@ id='myCollect'
           </a>
         </f7-list>
         <template v-if="!myCollOri">
-          <div class="noMessage">
-            <img src="../../assets/images/noPost.png" alt="">
-          </div>
-          <p class="no-any-message">还没有收藏的好文</p>
+        <div class="no-message-container">
+          <img src="../../assets/images/no-post.png" alt="">
+          <p class="no-any-message">还没有收藏的原创</p>
+        </div>
         </template>
       </f7-tab>
       <f7-tab  id="objPost" @tab:show.prevent.stop="tabShow('objPost')">
         <div class="loader text-center" v-if="shareLoading">
           <f7-preloader></f7-preloader>
-        </div>      
+        </div>
         <div class="post-water" v-if="myCollRev">
           <div class="post-row">
             <!-- <transition-group name="fade"> -->
@@ -131,12 +133,12 @@ id='myCollect'
             <!-- </transition-group> -->
           </div>
         </div>
-        <div v-if="myCollRev == undefined">
-          <div class="noMessage">
-            <img src="../../assets/images/noPost.png" alt="">
-          </div>
+        <template v-if="myCollRev == undefined">
+        <div class="no-message-container">
+          <img src="../../assets/images/no-feed.png" alt="">
           <p class="no-any-message">还没有收藏的晒物</p>
-        </div>
+        </div>          
+        </template>
       </f7-tab>
     </f7-tabs>
   </div>
@@ -146,17 +148,8 @@ id='myCollect'
     </div> -->
 </f7-page>
 </template>
-<style lang="less" scoped>
+<style lang="less">
 @import url( '../../assets/less/var.less');
-  .slide-enter-active,
-  .slide-leave-active {
-      transition: all 0.3s;
-  }
-  .slide-enter,
-  .slide-leave-active {
-      opacity: 0;
-      transform: translate(0,1.35135rem);
-  }
   .pixel-ratio-2 {
       .article-list-comp .item-content:after {
           transform: scaleY(.5);
@@ -174,14 +167,17 @@ id='myCollect'
           background-color: #e2dede;
       }
   }
-  .info-container {
+  .collect-container {
       height: 100%;
       width: 100%;
       overflow-y: scroll;
       position: relative;
   }
-  .page-meesage {}
   .myCollect {
+    .page-content{
+      background-color: #f5f5f5!important;
+    }
+
       .list-no-type {
           list-style-type: none;
       }
@@ -275,27 +271,14 @@ id='myCollect'
               }
           }
       }
-      .newsContainer {
-          height: 100%;
-          width: 100%;
-          overflow-y: scroll;
-          position: relative;
-          .swiper-slide {
-              .preloader {
-                  width: 20px;
-                  height: 20px;
-                  margin-left: -10px;
-                  margin-top: -10px;
-              }
-          }
-      }
+
       .navbar .navbar-inner .right {
           .link {
               font-size: 0.40541rem;
               font-weight: 500;
           }
       }
-      .search-result {
+      .collect-tabs {
           #objPost,
           #original {
               .swiper-slide-active {
@@ -318,6 +301,15 @@ id='myCollect'
               }
           }
       }
+      .article-item-comp{
+        background-color: #fff;
+        padding: 0 .26666667rem;
+
+      }
+      .article-list-comp{
+        padding: 0;
+        margin-top: .4rem;
+      }      
   }
 </style>
 <script>
@@ -330,10 +322,10 @@ export default {
         obj: 0
       },
       originalLoading:true,
-      shareLoading:true      
+      shareLoading:true
     };
   },
-  computed: { 
+  computed: {
     myCollOri() {
       return this.$store.getters.myCollOriginal;
     },
@@ -344,22 +336,19 @@ export default {
   mounted() {
   },
   beforeCreate() {
-
-      var self = this;
-
-      this.$store.dispatch("myCollOriginal", {
-        page: 1,
-        limit: 10
-      })
-      .then(()=>{
-        self.originalLoading = false
-      })      
   },
   destroyed() {
-
   },
   methods: {
     reinitPage(){
+        var self = this;
+        this.$store.dispatch("myCollOriginal", {
+          page: 1,
+          limit: 10
+        })
+        .then(()=>{
+          self.originalLoading = false
+      });
       plus.navigator.setStatusBarStyle('dark');
     },
     tabShow(tab) {
@@ -375,7 +364,7 @@ export default {
           })
           .then(()=>{
             self.shareLoading = false
-          })    
+          })
           this.currentTab = 2;
           break;
       }

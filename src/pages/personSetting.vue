@@ -135,8 +135,8 @@ export default {
 		changeInfo(state){
 			var self = this,
 				currentView = self.$f7.getCurrentView();
-			this.$store.commit("changeUserInfo", state);
 			currentView.router.load({url:"changePersonInfo"});
+			this.$store.commit("changeUserInfo", state);
 		},
 		// changeHeadImg(){
 		// 	var create = plus.webview.create("/upLoadAvatar.html","create",{

@@ -22,7 +22,7 @@
 			<p>当前版本:{{version}}</p>
 		</f7-block>
 		<f7-list>
-			<f7-list-item link=" " @click="open('http://m.grozii.com/site/updateLog.html')">
+			<f7-list-item link=" " @click="open('http://m.grozii.com/site/update-log.html?type='+deviceType)">
 				更新日志
 			</f7-list-item>
 
@@ -41,6 +41,9 @@
 			<f7-list-item link=" " @click="open('http://m.grozii.com/site/policy.html')">
 				格物志用户协议
 			</f7-list-item>
+			<f7-list-item title="支持团队" link="mailto:support@grozii.com" link-external>
+				 support@grozii.com
+			</f7-list-item>			
 		</f7-list>
 	</f7-page>
 </template>
@@ -55,8 +58,8 @@
 		color: #666;
 	}
 	.icon{
-		width: 100px;
-		height: 100px;
+		width: 80px;
+		height: 80px;
 		margin: 0 auto;
 		border:.5px solid #eee;
 		overflow: hidden;
@@ -93,6 +96,9 @@ export default {
 				v = plus.runtime.version
 			}catch(e){}
 			return v
+		},
+		deviceType(){
+			return {"ios":0,"android":1}[this.$device.os]
 		}
 	},
 	methods:{

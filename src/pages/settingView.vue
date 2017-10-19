@@ -1,17 +1,17 @@
 <template>
-	<f7-page navbar-fixed class="setting no-toolbar">
-	    <f7-navbar sliding class="shadow">
-          <f7-nav-left>
-			<f7-link icon-only back>
-				<i class="iconfont icon-back">
+<f7-page navbar-fixed class="setting no-toolbar">
+  <f7-navbar sliding class="shadow">
+    <f7-nav-left>
+      <f7-link icon-only back>
+        <i class="iconfont icon-back">
 
 				</i>
-			</f7-link>
-          </f7-nav-left>
-          <f7-nav-center>
-          	设置
-          </f7-nav-center>
-          <f7-nav-right>
+      </f7-link>
+    </f7-nav-left>
+    <f7-nav-center>
+      设置
+    </f7-nav-center>
+    <f7-nav-right>
 
           </f7-nav-right>
 	    </f7-navbar>
@@ -24,86 +24,83 @@
 			</f7-list-item>
 		</f7-list>
 		<f7-list class="setting-list" v-if="hasLogin">
-			<f7-list-item link="/user/resetPassword/">
-				修改密码
+			<f7-list-item title="修改密码" link="/user/resetPassword/">
 			</f7-list-item>
 		</f7-list>
 		<f7-list class="setting-list">
-			<f7-list-item link="/about/">
-				关于格物志
+			<f7-list-item title="关于格物志" link="/about/">
 			</f7-list-item>
-			<f7-list-item  link="/userAdvice/">
-				发送反馈
+			<f7-list-item title="意见反馈"  link="/userAdvice/">
 			</f7-list-item>
 			<!-- <f7-list-item @click="checkVersion()" link=" " v-if="this.$device.android"> -->
-			<f7-list-item @click="checkVersion()" link=" " v-if="this.$device.android">
-				检查更新
+			<f7-list-item @click="checkVersion()" title="检查更新" link=" " v-if="this.$device.android">
 			</f7-list-item>
-			<f7-list-item @click="clearCache()">
-				清除缓存
+			<f7-list-item title="清除缓存" v-if="$device.ios" @click="clearCache()">
+				{{cacheSize | cacheCalc}}M
 			</f7-list-item>
-		</f7-list>
-		<f7-list class="setting-list login-out" v-if="hasLogin">
-			<f7-list-item @click="userLogout">
-				<span>退出登录</span>
-			</f7-list-item>
-		</f7-list>
-	</f7-page>
+
+  </f7-list>
+  <f7-list class="setting-list login-out" v-if="hasLogin">
+    <f7-list-item @click="userLogout">
+      <span>退出登录</span>
+    </f7-list-item>
+  </f7-list>
+</f7-page>
 </template>
 <style lang="less">
-	.setting{
-		.page-content{
-			background: #f5f5f5!important;
-		}
-		.list-block{
-			margin:10px 0 0 0;
-		}
-		.setting-list{
-			.progress{
-				.progressbar{
-					width: 50%;
-					position: relative;
-				}
-			}
-			.head-list{
-				.avatar{
-					width: 44px;
-					height: 44px;
-				}
-				span{
-					flex:1;
-					margin-left: 10px;
-					font-size: 12px;
-					color:#999;
-				}
-			}
-			.item-content{
-				min-height: 54px;
-				padding-left: 0;
-				.item-inner{
-					padding-left: 20px;
-					font-size: 15px;
-				}
-			}
-		}
-		.login-out{
-			.item-inner{
-				padding-right:20px;
-				span{
-					font-size: 15px;
-					margin:0 auto;
-					color: #e03c3c;
-				}
-			}
-		}
-	}
+.setting {
+    .page-content {
+        background: #f5f5f5!important;
+    }
+    .list-block {
+        margin: 10px 0 0;
+    }
+    .setting-list {
+        .progress {
+            .progressbar {
+                width: 50%;
+                position: relative;
+            }
+        }
+        .head-list {
+            .avatar {
+                width: 44px;
+                height: 44px;
+            }
+            span {
+                flex: 1;
+                margin-left: 10px;
+                font-size: 12px;
+                color: #999;
+            }
+        }
+        .item-content {
+            min-height: 54px;
+            padding-left: 0;
+            .item-inner {
+                padding-left: 20px;
+                font-size: 15px;
+            }
+        }
+    }
+    .login-out {
+        .item-inner {
+            padding-right: 20px;
+            span {
+                font-size: 15px;
+                margin: 0 auto;
+                color: #e03c3c;
+            }
+        }
+    }
+}
 </style>
 <script>
 import api from '../store/api.js'
 export default {
 	data(){
 		return {
-			cacheSize:"",
+			cacheSize:0,
 		}
 	},
 	beforeCreate(){
@@ -111,6 +108,20 @@ export default {
 	},
 	mounted(){
 		this.$store.dispatch('getNewestVer',{type:1});
+
+		var self = this
+		try{
+	        plus.io.requestFileSystem(plus.io.PRIVATE_DOC,function(entry){
+	            entry.root.getMetadata(function(data){
+	                self.cacheSize += data.size;
+	            },function(e){},true)
+	        })
+	        plus.io.requestFileSystem(plus.io.PUBLIC_DOWNLOADS,function(entry){
+	            entry.root.getMetadata(function(data){
+	                self.cacheSize += data.size;
+	            },function(e){},true)
+	        })	        
+		}catch(e){}
 	},
 	destroyed(){
 
@@ -129,13 +140,45 @@ export default {
 			return this.$store.getters.getNewestVer
 		}
 	},
+	filters:{
+		cacheCalc(e){
+			return (e/1024/1024).toFixed(2)
+		}
+	},
 	methods:{
 		clearCache(){
-
+			var self = this
+	        plus.io.requestFileSystem(plus.io.PRIVATE_DOC,function(entry){
+	            entry.root.removeRecursively(function(data){
+	            	//self.$toast.center("清除缓存完成")
+	                //self.cacheSize = 0;
+	            })
+	        })
+	        plus.io.requestFileSystem(plus.io.PUBLIC_DOWNLOADS,function(entry){
+	            entry.root.removeRecursively(function(data){
+	            	self.$toast.center("清除缓存完成")
+	                self.cacheSize = 0;
+	            })
+	        })	        
 		},
-		calcCache(){
-
-		},
+		userLogout(){
+			var self = this;
+			if(typeof plus == "undefined"){
+				self.$store.dispatch("getLogout").then(function(data){
+					self.$toast.center("退出登录成功")
+					self.$router.back()
+				},function(){})
+				return false;
+			}
+			plus.nativeUI.confirm( "确认退出当前账号?", function(e){
+				if(e.index==0){
+					self.$store.dispatch("getLogout").then(function(data){
+						self.$toast.center("退出登录成功")
+						self.$router.back()
+					},function(){})
+				}
+			}, "退出登录", ["退出","取消"] );
+		},		
 		checkVersion(){
 			var types = {};
 			var self = this;
@@ -143,12 +186,10 @@ export default {
 			types[plus.networkinfo.CONNECTION_WIFI] = "WiFi";
 			if(this.$device.android){
 				var update = function(){
-					plus.runtime.getProperty(plus.runtime.appid,function(inf){
-						var wgtVersion = inf.version;
 						var updateUrl = '';
 						api.checkAppUpdate({
 							type:'1',
-							version:wgtVersion
+							version:plus.runtime.version
 						},function(data){
 							if(data.code == 2000){
 								if(!data.data.is_need){
@@ -161,14 +202,7 @@ export default {
 											console.log(updateUrl);
 											if ( status == 200 ) {   // 下载成功
 												var path = d.filename;
-												plus.runtime.install(path,{},function(){
-													waiting.setTitle('数据资源包下载完成，正在重启应用...');
-													plus.io.resolveLocalFileSystemURL(path,function(entity){
-														entity.remove();
-													},function(error){
-														debugCom.log(error.message);
-													})
-												});
+												plus.runtime.install(path);
 											} else {   // 下载成功
 												alert( "下载失败:" + status );
 											}
@@ -199,14 +233,7 @@ export default {
 													console.log(updateUrl);
 													if ( status == 200 ) {	// 下载成功
 														var path = d.filename;
-														plus.runtime.install(path,{},function(){
-															waiting.setTitle('数据资源包下载完成，正在重启应用...');
-															plus.io.resolveLocalFileSystemURL(path,function(entity){
-																entity.remove();
-															},function(error){
-																debugCom.log(error.message);
-															})
-														});
+														plus.runtime.install(path);
 													} else {	// 下载成功
 														alert( "下载失败:" + status );
 													}
@@ -234,10 +261,9 @@ export default {
 									}
 								}
 							}else{
-								self.$toast.center("检测更新失败!");
+								self.$toast.center("检测更新失败");
 							}
 						})
-					});
 				}
 			}else{
 				var update = function(){
@@ -250,47 +276,29 @@ export default {
 						},function(data){
 							if(data.code == 2000){
 								if(!data.data.is_need){
-									self.$toast.center("无新版本可更新!");
+									self.$toast.center("当前已是最新版本");
 								}else{
-									var url='';
+									var url='itms-apps://itunes.apple.com/cn/app/id1274968835?l=zh&mt=8';
 									plus.runtime.openURL(url);
 								}
 							}else{
-								self.$toast.center("检测更新失败!");
+								self.$toast.center("检测更新失败");
 							}
 						})
 					});
 				}
 			}
 
-			if(types[plus.networkinfo.getCurrentType()] != "WiFi"){
-				plus.nativeUI.confirm( "当前网络处于非WiFi环境，是否继续?", function(e){
-					if(e.index==1){
-						update();
-					}
-				}, "版本更新", ["取消","继续"] );
-			}else{
-				update();
-			}
+			  if(types[plus.networkinfo.getCurrentType()] != "WiFi"){
+				  plus.nativeUI.confirm( "当前网络处于非WiFi环境，是否继续?", function(e){
+					  if(e.index==1){
+						  update();
+					  }
+				  }, "版本更新", ["取消","继续"] );
+			  }else{
+				  update();
+			  }
 		},
-		userLogout(){
-			var self = this;
-			if(typeof plus == "undefined"){
-				self.$store.dispatch("getLogout").then(function(data){
-					self.$toast.center("退出登录成功")
-					self.$router.back()
-				},function(){})
-				return false;
-			}
-			plus.nativeUI.confirm( "确认退出当前账号?", function(e){
-				if(e.index==0){
-					self.$store.dispatch("getLogout").then(function(data){
-						self.$toast.center("退出登录成功")
-						self.$router.back()
-					},function(){})
-				}
-			}, "退出登录", ["退出","取消"] );
-		}
-	}
+  }
 }
 </script>

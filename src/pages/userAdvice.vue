@@ -9,7 +9,7 @@
 			</f7-link>
           </f7-nav-left>
           <f7-nav-center>
-          		发送反馈
+          		反馈与建议
           </f7-nav-center>
           <f7-nav-right>
 	          <f7-link @click="send" class="text-sub" :disabled="advice.length<4">
@@ -17,19 +17,22 @@
 	          </f7-link>
           </f7-nav-right>          
 	    </f7-navbar>
-			<textarea v-model="advice" id="advice" placeholder="描述你遇到的问题或者建议" rows="5"></textarea>
+	    <div class="input-container border-bottom">
+			<textarea v-model="advice" id="advice"  placeholder="描述你遇到的问题或者建议" rows="5"></textarea>		
+	    </div>
 	</f7-page>
 </template>
 <style lang="less" scoped>
 .advice{
-
+	.list-block{
+		margin: 0;
+	}
 }
 #advice{
 	width: 100%;
 	border:none;
 	outline: none;
 	padding: 5px .4rem;
-	border-bottom: .5px solid #ccc;
 	font-size: 14px;
 	line-height: 1.3;
 	user-select:auto;

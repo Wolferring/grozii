@@ -1,20 +1,30 @@
 <template>
-<a class="thumb-like" :class="{'digg_active' : thisIsDigg}" @click="digg(diggId)">{{thisDiggsNum}}<i class="iconfont icon-like icon-only"></i></a>
+<div class="comment-thumb">
+  <f7-link @click="load({url: '/userReport/',query:{'report_link_type':(type=='post'? '4':'3'),'report_link_id':diggId}})">举报</f7-link>
+  <a class="thumb-like" :class="{'digg_active' : thisIsDigg}" @click="digg(diggId)">{{thisDiggsNum}}<i class="iconfont icon-like icon-only"></i></a>
+</div>
 </template>
 <style lang="less" scoped>
-.thumb-like {
+.comment-thumb{
     float: right;
     color: #999;
     font-size: 11px;
-    .iconfont{
-        display: inline-block;
-        padding-left: 5px;
-        font-size: 11px;
-
+    width: auto;
+    a{
+      color: inherit;
+      margin-left: 30px;
     }
-}
-.digg_active {
-    color: #23deb1;
+  .thumb-like {
+      .iconfont{
+          display: inline-block;
+          padding-left: 5px;
+          font-size: 11px;
+
+      }
+  }
+  .digg_active {
+      color: #23deb1;
+  }
 }
 </style>
 <script>
@@ -40,6 +50,13 @@ export default {
           this.$store.dispatch("evalCommonDigg",this.diggId).then(function() {}, function(data) {})
         }
     },
+    load(payload){
+      var self = this
+      const currentView = self.$f7.getCurrentView();
+
+      currentView.router.load(payload);
+     
+    }
   }
 }
 </script>

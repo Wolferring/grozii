@@ -1,5 +1,5 @@
 <template>
-	<f7-page navbar-fixed class="userFollows no-toolbar" pull-to-refresh @page:beforeanimation="reinit"  @ptr:refresh="onRefresh">
+	<f7-page navbar-fixed class="userFollows no-toolbar" @page:beforeanimation="reinit"  @ptr:refresh="onRefresh">
 	    <f7-navbar sliding class="navbar-black">
 			<f7-nav-left>
 		      <f7-link icon-only back>
@@ -15,7 +15,12 @@
 		  </f7-nav-right>
 	    </f7-navbar>
       <user-list :users="userFollowInfo" v-if="userFollowInfo.length" :type="'other'"></user-list>
-     <p v-else class="no-more">Ta还没有关注的人</p>
+    <template v-else>
+      <div class="no-message-container">
+        <img src="../../assets/images/no-user.png" alt="">
+        <p class="no-any-message">Ta还没有关注的人...</p>
+      </div>
+    </template>  
 	</f7-page>
 </template>
 <style lang="less">
@@ -24,6 +29,7 @@
       background-color: #f5f5f5;
         .page-content{
             background: #f5f5f5!important;
+            padding-top: 64px!important;
         }
         .no-more{
             font-size: 12px;
@@ -31,6 +37,9 @@
             text-align: center;
             margin-top: 13px;
         }
+		.pull-to-refresh-layer{
+			margin-top: -45px;
+		}
     }
 </style>
 <script>
@@ -49,7 +58,7 @@ export default {
       return this.$store.getters.userFollowInfo;
     },
   	pid(){
-  		return this.$route.params.pid
+  		return this.$route.params.user_id
   	},
   },
   methods: {
@@ -60,12 +69,12 @@ export default {
 			type:1
 		});
     plus.navigator.setStatusBarStyle('dark');
-    
+
 	},
 	onRefresh() {
 	  var self = this;
 	  self.$store.dispatch("userFollowInfo", {
-		user_id: this.$route.params.pid,
+		user_id: self.pid,
 		type: 1
 	  }).then(function() {
 		self.$f7.pullToRefreshDone()

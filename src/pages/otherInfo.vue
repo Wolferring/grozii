@@ -1,5 +1,5 @@
 <template>
-<f7-page no-navbar class="other-info no-navbar no-toolbar" @page:afteranimation="reinit">
+<f7-page no-navbar toolbar-fixed class="other-info no-navbar" @page:afteranimation="reinit">
   <f7-navbar sliding class="navbar-hidden">
     <f7-nav-left>
       <f7-link icon-only back>
@@ -19,13 +19,18 @@
         <img src="../assets/images/loginBg.jpg" alt="">
       </div>
       <div class="head-bar">
-        <f7-link back>
+        <f7-link icon-only back>
           <i class="iconfont icon-back back "></i>
         </f7-link>
-          <f7-link class="follow-op" @click="cancle" v-if="user.hasLogin&&(otherInfo.id != user.info.id)">
-            <i class="iconfont icon-close" :class="{'canclefollowbtn':otherInfo.is_follow,'followbtn':!otherInfo.is_follow}"></i> <span>{{otherInfo.is_follow?"已关注":"关注"}}</span>
-          </f7-link>
+        <f7-link
+            icon-only
+            @click="openAction($event)"
+            class=""
+            v-if="(otherInfo.id != user.info.id)">
+                <i class="iconfont icon-more"></i>
+        </f7-link>
       </div>
+
       <div class="user-avatar">
         <div class="avatar">
           <img :src="otherInfo.avatar" alt="">
@@ -62,11 +67,13 @@
       </div>
     </div>
     <f7-tabs>
-      <f7-tab :id="'original'+timeStamp" active @tab:show="tabShow('original'+timeStamp)">
+      <f7-tab :id="'original'+timeStamp" active @tab:show.prevent.stop="tabShow('original'+timeStamp)">
         <f7-list media-list v-if="userOri" class="no-top-border article-list-comp" no-border>
           <a @click="$router.load({url:'/evalDetail/'+ item.id,pushState:false})" href="javascript:void(0)" v-for="item in userOri">
             <f7-list-item class="article-item-comp list-no-type">
               <img :src="item.cover" slot="media" alt="">
+              <span class="label label-digest" slot="media-start" v-if="item.is_digest">精华</span>
+              
               <div class="content">{{item.content}}</div>
               <div class="auth">
                 <div class="author">
@@ -89,12 +96,12 @@
         </f7-list>
         <div v-if="!userOri">
           <div class="noMessage">
-            <img src="../assets/images/noPost.png" alt="">
+            <img src="../assets/images/no-post.png" alt="">
           </div>
-          <p class="no-any-message">还没有发布过原创</p>
+          <p class="no-any-message">还没有发布任何内容</p>
         </div>
       </f7-tab>
-      <f7-tab :id="'objPost'+timeStamp" @tab:show="tabShow('objPost'+timeStamp)">
+      <f7-tab :id="'objPost'+timeStamp" @tab:show.prevent.stop="tabShow('objPost'+timeStamp)">
         <div class="post-water" v-if="userRev">
           <div class="post-row">
             <!-- <transition-group name="fade"> -->
@@ -147,14 +154,28 @@
         </div>
         <div v-if="!userRev">
           <div class="noMessage">
-            <img src="../assets/images/noPost.png" alt="">
+            <img src="../assets/images/no-feed.png" alt="">
           </div>
-          <p class="no-any-message">还没有发布过晒物</p>
+          <p class="no-any-message">还没有发布任何内容</p>
         </div>
       </f7-tab>
     </f7-tabs>
   </div>
   </div>
+  <f7-toolbar class="no-border text-center"  v-if="(otherInfo.id != user.info.id)">
+      <f7-link @click="cancle" class="follow-link" :class="{'active':otherInfo.is_follow,'disabled':isFollowing}">
+         <i class="iconfont" :class="otherInfo.is_follow?'icon-zhengque':'icon-xinjian'"></i>{{otherInfo.is_follow?"已关注":"关注"}}
+      </f7-link>
+  </f7-toolbar>
+<div id="userAction" slot="fixed" class="action" v-if="actionShow">
+    <div class="action-layer" @touchmove.prevent="" @click="actionShow=false">
+
+    </div>
+    <div class="action-list" :style="{'top':actionClickTop+'px'}">
+        <f7-link class="action-item" @click="load({url: '/userReport/',query:{'report_link_type':'5','report_link_id':otherInfo.id}})"><i class="iconfont icon-jubao"></i>举报
+        </f7-link>
+    </div>
+</div>
 </f7-page>
 </template>
 <style lang="less">
@@ -166,6 +187,84 @@
     .page-content {
         background: #f5f5f5!important;
         -webkit-overflow-scrolling:none;
+    }
+    .toolbar{
+        height: 50px;
+    }
+    a.follow-link{
+        display: block!important;
+        text-align: center;
+        line-height: 50px;
+        height: 50px;
+        width: 100%;
+        font-size:14px;
+        color:@sub-color;
+        .iconfont{
+            margin-right: 8px;
+            font-size: 12px;
+        }
+        &.active{
+            color: #bbb;
+        }
+    }
+    #userAction{
+        z-index: 10001;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        .action-layer{
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,.7);
+            left: 0;
+            z-index: 0;
+        }
+        .action-list{
+            &:before{
+                content: "";
+                display: block;
+                height: 10px;
+                width: 10px;
+                background-color: #fff;
+                position: absolute;
+                z-index: -1;
+                top: -5px;
+                right: 10px;
+                transform:rotate(45deg);
+            }
+            position: absolute;
+            z-index: 10;
+            width:2rem;
+            border-radius: 0;
+            padding: 0 .13333333rem;
+            background-color: #fff;
+            color:#333;
+            position: absolute;
+            right: 15px;
+            font-size: 13px;
+            border-radius: 2px;
+            box-sizing: border-box;
+            .iconfont{
+                font-size: 18px;
+                color: #333;
+                margin-right: 2px;
+                &.icon-share{
+                    font-size: 14px;
+                }
+            }
+        }
+        .action-item{
+            display: block;
+            border-bottom: .5px solid #ddd;
+            line-height: 45px;
+            height: 45px;
+            padding-left: 10px;
+            &:last-child{
+                border-bottom: none;
+            }
+        }
     }
     .post-item {
         .image {
@@ -183,14 +282,15 @@
             color: #fff;
             line-height: 25px;
             position: absolute;
+            display: flex;
+            justify-content:space-between;
+            align-items:center;
             top:35px;
             width: 100%;
+            padding: 0 10px;
+            box-sizing: border-box;
             a {
                 color: #fff;
-            }
-            .back {
-                margin-left: 12px;
-                width: 10px;
             }
             .follow-op{
                 float: right;
@@ -215,7 +315,7 @@
                     top: 0;
                     left: 5px;
                     display: inline-block;
-                    font-size: 15px; 
+                    font-size: 15px;
                     transition:transform .3s ease;
                 }
                 .followbtn {
@@ -376,6 +476,8 @@
         }
     }
 }
+
+
 </style>
 <script>
 export default {
@@ -385,19 +487,22 @@ export default {
       headImageHeight: 180,
       currentTab: "original",
       infotabState: true,
+      actionShow:false,
+      actionClickTop:40,
       timeStamp: new Date().getTime(),
+      isFollowing:false,
       postOriArg: {
-        user_id: this.$route.params.pid,
+        user_id: this.$route.params.ouid,
         page: 1,
         limit: 5
       },
       postRevArg: {
-        user_id: this.$route.params.pid,
+        user_id: this.$route.params.ouid,
         page: 1,
         limit: 5
       },
       infoArg: {
-        user_id: this.$route.params.pid,
+        user_id: this.$route.params.ouid,
       }
     };
   },
@@ -406,7 +511,7 @@ export default {
   },
   computed: {
     pid() {
-      return this.$route.params.pid;
+      return this.$route.params.ouid;
     },
     otherInfo() {
       return this.$store.getters.getOtherInfo;
@@ -437,18 +542,44 @@ export default {
       self.$store.dispatch("userPostOriginal", this.postOriArg);
       self.$store.dispatch("userPostReveal", this.postRevArg);
       plus.navigator.setStatusBarStyle('light');
-      
+
     },
     handleScroll() {
       const scrollTop = this.$refs.userScroller.scrollTop;
     },
+    openAction(e){
+        this.actionClickTop = e.y+20;
+        this.actionShow = true
+    },
+    load(payload){
+      var self = this
+      this.actionShow = false
+      const currentView = self.$f7.getCurrentView();
+      currentView.router.load(payload);
+    },
     cancle() {
       var self = this;
       this.ifFollow = !this.ifFollow;
+      if(!this.user.hasLogin){
+        this.$store.commit("COM_CONF",{
+            isLoginScreenShow:true
+        })
+        return false
+      }
+      if(this.isFollowing){
+        return false
+      }
+      this.isFollowing = true
       self.$store.dispatch('followUser', {
         uid: this.otherInfo.id
-      }).then(function(){
+      })
+      .then(()=>{
           self.$store.dispatch("getOtherInfo", self.infoArg);
+          this.isFollowing = false
+      })
+      .catch(e=>{
+          this.isFollowing = false
+          this.$toast.center(e.msg||"操作失败")
       })
     }
   }

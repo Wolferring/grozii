@@ -8,12 +8,17 @@ var htmlPlus = {
 		// 扩展API准备完成后要执行的操作
 		function plusReady(){
 			plus.key.addEventListener("backbutton",function(){
-                let browser = plus.webview.getWebviewById("browser")
-
-				if(browser){
-                    plus.webview.close(browser,"slide-out-right")
-                    return false;
-				}
+                let currentWeb = plus.webview.getDisplayWebview()[0].id
+                switch(currentWeb){
+                	case "create":
+	                    plus.webview.close("create","slide-out-right")
+	                    return false;                	
+                		break;
+                	case "browser":
+	                    plus.webview.close("browser","slide-out-right")
+	                    return false;
+	                	break;
+                }
 				self.$router.back();
 			},false)
 
